@@ -8,13 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
-import type { HeroContent } from "@/lib/content-manager"
 
-interface HeroProps {
-  content: HeroContent
-}
-
-export function Hero({ content }: HeroProps) {
+export function Hero() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
@@ -62,8 +57,12 @@ export function Hero({ content }: HeroProps) {
       <div className="container relative z-10">
         <div className="grid gap-8 md:grid-cols-2 md:gap-12">
           <div className="flex flex-col justify-center text-white">
-            <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">{content.title}</h1>
-            <p className="mb-6 max-w-md text-lg md:text-xl">{content.subtitle}</p>
+            <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+              Connecticut House Republicans
+            </h1>
+            <p className="mb-6 max-w-md text-lg md:text-xl">
+              Fighting for Connecticut's families and businesses with common-sense solutions.
+            </p>
             <form onSubmit={handleSubmit} className="w-full max-w-md">
               <div className="space-y-3">
                 <div className="relative">
@@ -142,7 +141,9 @@ export function Hero({ content }: HeroProps) {
                 </Button>
               )}
             </form>
-            <p className="mt-2 text-sm text-white/80">{content.newsletterText}</p>
+            <p className="mt-2 text-sm text-white/80">
+              Stay informed with the latest news and updates from our caucus.
+            </p>
           </div>
           <div className="flex items-center justify-center">
             <div className="relative h-64 w-64 overflow-hidden rounded-full border-4 border-white md:h-80 md:w-80">

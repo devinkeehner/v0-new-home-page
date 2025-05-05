@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Loader2, ExternalLink, AlertCircle } from "lucide-react"
+import { Loader2, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { fetchFlickrImages, type FlickrPhoto } from "@/lib/flickr"
@@ -100,36 +100,21 @@ export default function FlickrGallery() {
     setSelectedPhoto(null)
   }
 
-  // Get Flickr photo page URL
-  const getFlickrPhotoUrl = (photo: FlickrPhoto) => {
-    return `https://www.flickr.com/photos/${USER_ID}/${photo.id}`
-  }
-
   return (
     <section className="py-12">
       <div className="container">
-        <h2 className="mb-8 text-center text-3xl font-bold text-primary-navy">Photo Gallery</h2>
+        {/* Removed heading */}
 
         {loading && photos.length === 0 && (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="mr-2 h-6 w-6 animate-spin text-secondary-red" />
-            <span>Loading photos...</span>
+            <Loader2 className="mr-2 h-10 w-10 animate-spin text-secondary-red" />
+            <span className="text-lg">Loading photos...</span>
           </div>
         )}
 
         {error && photos.length === 0 && (
           <div className="mx-auto max-w-md rounded-md bg-red-50 p-4 text-center text-red-800">
-            <div className="flex items-center justify-center">
-              <AlertCircle className="mr-2 h-5 w-5" />
-              <h3 className="font-medium">Error loading photos</h3>
-            </div>
             <p className="mt-2 text-sm">{error}</p>
-            <Button
-              onClick={() => window.location.reload()}
-              className="mt-4 bg-secondary-red hover:bg-secondary-red/90"
-            >
-              Try Again
-            </Button>
           </div>
         )}
 
@@ -141,13 +126,24 @@ export default function FlickrGallery() {
               className="photo-item cursor-pointer overflow-hidden"
               onClick={() => openPhotoModal(photo)}
             >
-              <img
-                src="/loading-screen-animation.png"
-                data-src={photo.medium || "/placeholder.svg"}
-                alt={photo.title}
-                className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                loading="lazy"
-              />
+              {/* Use spinner for loading state */}
+              <div className="relative h-full w-full bg-gray-100 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400 absolute" />
+                <img
+                  src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                  data-src={photo.medium || "/placeholder.svg"}
+                  alt={photo.title}
+                  className="h-full w-full object-cover transition-transform duration-300 hover:scale-105 opacity-0"
+                  onLoad={(e) => {
+                    // Once loaded, hide spinner and show image
+                    const target = e.target as HTMLImageElement
+                    target.classList.remove("opacity-0")
+                    const spinner = target.previousElementSibling
+                    if (spinner) spinner.classList.add("hidden")
+                  }}
+                  loading="lazy"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -161,10 +157,11 @@ export default function FlickrGallery() {
           />
         )}
 
+        {/* Added back the "See More Photos" button */}
         <div className="mt-8 text-center">
           <Link href="https://www.flickr.com/photos/cthouserepublicans/" target="_blank" rel="noopener noreferrer">
             <Button className="bg-secondary-red hover:bg-secondary-red/90">
-              View Full Gallery <ExternalLink className="ml-2 h-4 w-4" />
+              See More Photos <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>

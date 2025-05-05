@@ -32,11 +32,14 @@ interface NewsCarouselProps {
 }
 
 export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
+  // Limit to 18 posts
+  const limitedPosts = posts.slice(0, 18)
+
   // Group posts into sets of 3
   const itemsPerPage = 3
-  const totalGroups = Math.ceil(posts.length / itemsPerPage)
+  const totalGroups = Math.ceil(limitedPosts.length / itemsPerPage)
   const postGroups = Array.from({ length: totalGroups }, (_, i) =>
-    posts.slice(i * itemsPerPage, (i + 1) * itemsPerPage),
+    limitedPosts.slice(i * itemsPerPage, (i + 1) * itemsPerPage),
   )
 
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -64,19 +67,68 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
     return (
       <section className="py-12">
         <div className="container">
-          <h2 className="text-3xl font-bold text-primary-navy">Latest News</h2>
+          <h2 className="text-3xl font-bold text-primary-navy text-center">Latest News</h2>
           <div className="mt-8 text-center">Loading news...</div>
         </div>
       </section>
     )
   }
 
+  // Render a single post card
+  const renderPostCard = (post: WordPressPost) => {
+    const imageUrl = getFeaturedImageUrl(post)
+
+    return (
+      <Card key={post.id} className="flex h-full flex-col overflow-hidden">
+        <Link
+          href={post.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative h-48 w-full bg-muted transition-opacity hover:opacity-90"
+        >
+          {imageUrl && (
+            <div className="h-full w-full overflow-hidden">
+              <img
+                src={imageUrl || "/placeholder.svg"}
+                alt={post.title.rendered}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </Link>
+        <CardHeader>
+          <Link
+            href={post.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-secondary-red transition-colors"
+          >
+            <CardTitle
+              className="line-clamp-2 text-lg text-primary-navy"
+              dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+            />
+          </Link>
+          <CardDescription>{formatWordPressDate(post.date)}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow">
+          <p className="line-clamp-3 text-sm">{stripHtmlTags(post.excerpt.rendered)}</p>
+        </CardContent>
+        <CardFooter>
+          <Link href={post.link} target="_blank" rel="noopener noreferrer">
+            <Button className="bg-secondary-red hover:bg-secondary-red/90">Read More</Button>
+          </Link>
+        </CardFooter>
+      </Card>
+    )
+  }
+
   return (
     <section className="py-12">
       <div className="container">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-center">
           <h2 className="text-3xl font-bold text-primary-navy">Latest News</h2>
-          <div className="flex gap-2">
+          <div className="hidden md:flex gap-2 absolute right-4">
             <Button
               variant="outline"
               size="icon"
@@ -92,57 +144,24 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
           </div>
         </div>
 
-        <div className="relative overflow-hidden">
+        {/* Mobile view - stacked cards */}
+        <div className="md:hidden space-y-6">{limitedPosts.slice(0, 3).map(renderPostCard)}</div>
+
+        {/* Desktop view - carousel */}
+        <div className="relative hidden md:block overflow-hidden">
           <div
             className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
             {postGroups.map((group, groupIndex) => (
               <div key={groupIndex} className="w-full flex-shrink-0">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  {group.map((post) => {
-                    // Get the image URL directly
-                    const imageUrl = getFeaturedImageUrl(post)
-
-                    return (
-                      <Card key={post.id} className="flex h-full flex-col overflow-hidden">
-                        <div className="relative h-48 w-full bg-muted">
-                          {imageUrl && (
-                            <div className="h-full w-full overflow-hidden">
-                              <img
-                                src={imageUrl || "/placeholder.svg"}
-                                alt={post.title.rendered}
-                                className="h-full w-full object-cover"
-                                loading="lazy"
-                              />
-                            </div>
-                          )}
-                        </div>
-                        <CardHeader>
-                          <CardTitle
-                            className="line-clamp-2 text-lg text-primary-navy"
-                            dangerouslySetInnerHTML={{ __html: post.title.rendered }}
-                          />
-                          <CardDescription>{formatWordPressDate(post.date)}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-grow">
-                          <p className="line-clamp-3 text-sm">{stripHtmlTags(post.excerpt.rendered)}</p>
-                        </CardContent>
-                        <CardFooter>
-                          <Link href={post.link} target="_blank" rel="noopener noreferrer">
-                            <Button className="bg-secondary-red hover:bg-secondary-red/90">Read More</Button>
-                          </Link>
-                        </CardFooter>
-                      </Card>
-                    )
-                  })}
-                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">{group.map(renderPostCard)}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="mt-4 flex justify-center gap-2">
+        <div className="mt-4 hidden md:flex justify-center gap-2">
           {postGroups.map((_, index) => (
             <button
               key={index}

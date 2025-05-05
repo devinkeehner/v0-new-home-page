@@ -3,7 +3,6 @@ import { NewsCarousel } from "@/components/news-carousel"
 import SocialFeedEmbed from "@/components/social-feed-embed"
 import { PhotoGallery } from "@/components/photo-gallery"
 import { getWordPressPosts } from "@/lib/api"
-import { getSiteContent } from "@/lib/kv-content-manager"
 
 export default async function Home() {
   // Fetch WordPress posts with error handling
@@ -16,12 +15,9 @@ export default async function Home() {
     // Continue rendering the page even if posts fetch fails
   }
 
-  // Get site content
-  const siteContent = await getSiteContent()
-
   return (
     <>
-      <Hero content={siteContent.hero} />
+      <Hero />
       <NewsCarousel posts={posts} />
       <SocialFeedEmbed />
       <PhotoGallery />
