@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,22 +17,28 @@ const heroSlides = [
     title: "Connecticut House Republicans",
     subtitle: "Fighting for Connecticut's families and businesses with common-sense solutions.",
     image: "/images/ct-house-gop-optimized.webp",
+    buttonText: "Learn More",
+    buttonLink: "https://www.cthousegop.com/about/",
   },
   {
     id: 2,
-    title: "Tax Relief for Connecticut",
-    subtitle: "Our plan provides meaningful tax relief to residents and businesses across the state.",
-    image: "/placeholder.svg?key=rc82g",
+    title: "Reality Check Budget",
+    subtitle: "A responsible budget plan that spends less while delivering real tax relief for Connecticut residents.",
+    image: "/placeholder.svg?key=q1s1z",
+    buttonText: "View Budget",
+    buttonLink: "https://www.cthousegop.com/budget/",
   },
   {
     id: 3,
-    title: "Reality Check Budget",
-    subtitle: "A responsible budget plan that spends less while delivering real tax relief for Connecticut residents.",
-    image: "/placeholder.svg?key=nfn2q",
+    title: "Tax Relief for Connecticut",
+    subtitle: "Our plan provides meaningful tax relief to residents and businesses across the state.",
+    image: "/placeholder.svg?key=3oz8s",
+    buttonText: "Tax Relief Details",
+    buttonLink: "https://www.cthousegop.com/tax-relief/",
   },
 ]
 
-export function Hero() {
+export function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
   const [formData, setFormData] = useState({
@@ -42,6 +48,15 @@ export function Hero() {
     firstName: "",
     lastName: "",
   })
+
+  // Auto-advance slides
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    }, 7000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -95,14 +110,25 @@ export function Hero() {
       <div className="container relative z-10">
         <div className="grid gap-8 md:grid-cols-2 md:gap-12">
           <div className="flex flex-col justify-center text-white">
-            <div className="transition-opacity duration-500">
-              <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-                {heroSlides[currentSlide].title}
-              </h1>
-              <p className="mb-6 max-w-md text-lg md:text-xl">{heroSlides[currentSlide].subtitle}</p>
-            </div>
+            {heroSlides.map((slide, index) => (
+              <div
+                key={slide.id}
+                className={cn(
+                  "transition-opacity duration-500 absolute",
+                  index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none",
+                )}
+              >
+                <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">{slide.title}</h1>
+                <p className="mb-6 max-w-md text-lg md:text-xl">{slide.subtitle}</p>
+                <Button className="bg-secondary-red hover:bg-secondary-red/90 mb-8" asChild>
+                  <a href={slide.buttonLink} target="_blank" rel="noopener noreferrer">
+                    {slide.buttonText}
+                  </a>
+                </Button>
+              </div>
+            ))}
 
-            <form onSubmit={handleSubmit} className="w-full max-w-md">
+            <form onSubmit={handleSubmit} className="w-full max-w-md mt-auto">
               <div className="space-y-3">
                 <div className="relative">
                   <Input
@@ -184,7 +210,7 @@ export function Hero() {
               Stay informed with the latest news and updates from our caucus.
             </p>
           </div>
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center relative">
             <div className="relative h-64 w-64 overflow-hidden rounded-full border-4 border-white md:h-80 md:w-80">
               <Image
                 src="/images/ct-house-gop-optimized.webp"
@@ -195,7 +221,7 @@ export function Hero() {
             </div>
 
             {/* Slider controls */}
-            <div className="absolute bottom-4 right-4 flex gap-2">
+            <div className="absolute bottom-0 right-0 flex gap-2">
               <Button
                 variant="outline"
                 size="icon"

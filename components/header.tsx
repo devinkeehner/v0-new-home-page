@@ -3,25 +3,27 @@
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, ChevronDown, ChevronRight } from "lucide-react"
+import { Menu, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
-// Structured navigation items based on the provided content
+// Restructured navigation items based on the new requirements
 const navItems = [
-  { name: "Home", href: "/" },
+  { name: "Contact", href: "https://www.cthousegop.com/contact/" },
   {
     name: "Representatives",
-    href: "/representatives",
+    href: "#",
     children: [
-      { name: "Leadership Team", href: "https://www.cthousegop.com/leadership-team-2023/" },
+      { name: "Leadership Team", href: "https://www.cthousegop.com/leadership-team-2025/" },
+      { name: "Committee Assignments", href: "https://www.cthousegop.com/committees/" },
+      { name: "Caucus Members", href: "https://www.cthousegop.com/caucus-members/" },
       { name: "Find a Legislator", href: "https://www.cga.ct.gov/asp/menu/CGAFindLeg.asp" },
     ],
   },
   {
     name: "Newsroom",
-    href: "/newsroom",
+    href: "https://www.cthousegop.com/caucus-newsroom/",
     children: [
       { name: "Caucus Newsroom", href: "https://www.cthousegop.com/caucus-newsroom/" },
       { name: "Media Inquiries", href: "https://www.cthousegop.com/communications-contacts/" },
@@ -29,7 +31,7 @@ const navItems = [
   },
   {
     name: "Legislation",
-    href: "/legislation",
+    href: "#",
     children: [
       { name: "Bill & Document Search", href: "https://search.cga.state.ct.us/r/basic/" },
       { name: "Bill Information Search", href: "https://www.cga.ct.gov/asp/CGABillInfo/CGABillInfoRequest.asp" },
@@ -42,13 +44,13 @@ const navItems = [
   },
   {
     name: "Resources",
-    href: "/resources",
+    href: "#",
     children: [
       {
         name: "Caucus Resources",
         href: "#",
         children: [
-          { name: "Leadership Team", href: "https://www.cthousegop.com/leadership-team-2023/" },
+          { name: "Leadership Team", href: "https://www.cthousegop.com/leadership-team-2025/" },
           { name: "House Republicans", href: "https://www.cthousegop.com" },
           { name: "Caucus Newsroom", href: "https://www.cthousegop.com/caucus-newsroom/" },
           { name: "Media Inquiries", href: "https://www.cthousegop.com/communications-contacts/" },
@@ -107,7 +109,6 @@ const navItems = [
       },
     ],
   },
-  { name: "Contact", href: "/contact" },
 ]
 
 export function Header() {
@@ -147,10 +148,22 @@ export function Header() {
 
   const toggleDropdown = (path: string) => {
     setActiveDropdowns((current) => {
-      if (current.includes(path)) {
-        return current.filter((id) => id !== path)
+      // Close any other top-level dropdowns
+      const filtered = current.filter((id) => {
+        // Keep this path and its children
+        if (id === path || id.startsWith(`${path}-`)) return true
+
+        // For other paths, check if this path is a child of any active path
+        const isChildOfActivePath = current.some((activePath) => path.startsWith(`${activePath}-`))
+
+        return isChildOfActivePath
+      })
+
+      // Toggle this dropdown
+      if (filtered.includes(path)) {
+        return filtered.filter((id) => id !== path && !id.startsWith(`${path}-`))
       } else {
-        return [...current, path]
+        return [...filtered, path]
       }
     })
   }
@@ -166,27 +179,52 @@ export function Header() {
       timeoutRef.current[path] = null
     }
 
-    // Add this path to active dropdowns
+    // Close any sibling dropdowns at the same level
     setActiveDropdowns((prev) => {
-      if (!prev.includes(path)) {
-        return [...prev, path]
+      const pathParts = path.split("-")
+      const parentPath = pathParts.slice(0, -1).join("-")
+
+      // Filter out siblings but keep the parent and other branches
+      const filtered = prev.filter((id) => {
+        // Keep if it's not related to this level
+        if (!id.includes(parentPath)) return true
+
+        // Keep parent
+        if (id === parentPath) return true
+
+        // Keep if it's this path or its children
+        if (id === path || id.startsWith(`${path}-`)) return true
+
+        // Otherwise, it's a sibling or sibling's child - remove it
+        return false
+      })
+
+      // Add this path if it's not already there
+      if (!filtered.includes(path)) {
+        return [...filtered, path]
       }
-      return prev
+      return filtered
     })
   }
 
   const handleMouseLeave = (path: string) => {
     // Set a timeout before removing the dropdown
     timeoutRef.current[path] = setTimeout(() => {
-      setActiveDropdowns((prev) => prev.filter((id) => id !== path))
+      setActiveDropdowns((prev) => prev.filter((id) => id !== path && !id.startsWith(`${path}-`)))
       timeoutRef.current[path] = null
-    }, 500) // 500ms delay before closing
+    }, 300) // 300ms delay before closing
+  }
+
+  // Determine if a menu should open to the left instead of right
+  const shouldOpenLeft = (itemName: string) => {
+    return itemName === "Resources"
   }
 
   const renderDesktopNavItem = (item: any, path = "") => {
     const hasChildren = item.children && item.children.length > 0
     const currentPath = path ? `${path}-${item.name}` : item.name
     const isActive = isDropdownActive(currentPath)
+    const openLeft = shouldOpenLeft(item.name)
 
     if (!hasChildren) {
       return (
@@ -260,12 +298,15 @@ export function Header() {
                     }}
                   >
                     {child.name}
-                    <ChevronRight className="h-4 w-4" />
+                    {openLeft ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </button>
 
                   {isDropdownActive(childPath) && (
                     <div
-                      className="absolute left-full top-0 z-10 min-w-[200px] rounded-md border bg-white py-1 shadow-lg"
+                      className={cn(
+                        "absolute top-0 z-10 min-w-[200px] rounded-md border bg-white py-1 shadow-lg",
+                        openLeft ? "right-full" : "left-full",
+                      )}
                       onMouseEnter={() => handleMouseEnter(childPath)}
                       onMouseLeave={() => handleMouseLeave(childPath)}
                     >
