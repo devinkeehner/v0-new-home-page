@@ -404,16 +404,113 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container flex flex-col h-24">
         {/* Top row with logo and social icons */}
-        <div className="flex justify-between items-center py-2">
-          <Link href="/" className="flex items-center space-x-2">
-            <Image
-              src="/images/ct-house-gop-logo.jpg"
-              alt="Connecticut House Republicans"
-              width={200}
-              height={50}
-              className="h-14 w-auto"
-            />
-          </Link>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center py-2">
+          <div className="flex justify-between items-center">
+            <Link href="/" className="flex items-center space-x-2">
+              <Image
+                src="/images/ct-house-gop-logo.jpg"
+                alt="Connecticut House Republicans"
+                width={200}
+                height={50}
+                className="h-14 w-auto"
+              />
+            </Link>
+
+            {/* Mobile Menu Button */}
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost">
+                  <span className="sr-only">Open main menu</span>
+                  <Menu className="h-6 w-6" aria-hidden="true" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+                <div className="py-4">
+                  <Link href="/" className="mb-6 flex items-center space-x-2">
+                    <Image
+                      src="/images/ct-house-gop-logo.jpg"
+                      alt="Connecticut House Republicans"
+                      width={150}
+                      height={40}
+                      className="h-10 w-auto"
+                    />
+                  </Link>
+
+                  {/* Social Icons - Mobile Sheet */}
+                  <div className="flex social-icons justify-center my-4">
+                    {socialLinks.map((link) => (
+                      <a
+                        key={link.name}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={link.name}
+                      >
+                        <img
+                          src={link.icon || "/placeholder.svg"}
+                          alt={link.name}
+                          width={24}
+                          height={24}
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+
+                  {/* Signup Form in Mobile Menu */}
+                  <div className="my-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
+                    <form
+                      className="space-y-3"
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        alert("Thank you for signing up!")
+                        // Reset form
+                        const form = e.target as HTMLFormElement
+                        form.reset()
+                      }}
+                    >
+                      <input
+                        type="email"
+                        placeholder="Email address"
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="tel"
+                          placeholder="Mobile number"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Zip code"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
+                      >
+                        Sign Up
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className="mt-6 space-y-1">{navItems.map((item) => renderMobileNavItem(item))}</div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Social Icons - Mobile (below logo) */}
+          <div className="md:hidden flex social-icons justify-center mt-2">
+            {socialLinks.map((link) => (
+              <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.name}>
+                <img src={link.icon || "/placeholder.svg"} alt={link.name} width={24} height={24} loading="lazy" />
+              </a>
+            ))}
+          </div>
 
           {/* Social Icons - Desktop Only */}
           <div className="hidden md:flex social-icons">
@@ -423,52 +520,6 @@ export function Header() {
               </a>
             ))}
           </div>
-
-          {/* Mobile Menu Button */}
-          <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost">
-                <span className="sr-only">Open main menu</span>
-                <Menu className="h-6 w-6" aria-hidden="true" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="py-4">
-                <Link href="/" className="mb-6 flex items-center space-x-2">
-                  <Image
-                    src="/images/ct-house-gop-logo.jpg"
-                    alt="Connecticut House Republicans"
-                    width={150}
-                    height={40}
-                    className="h-10 w-auto"
-                  />
-                </Link>
-
-                {/* Social Icons - Mobile */}
-                <div className="flex social-icons justify-center my-4">
-                  {socialLinks.map((link) => (
-                    <a
-                      key={link.name}
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={link.name}
-                    >
-                      <img
-                        src={link.icon || "/placeholder.svg"}
-                        alt={link.name}
-                        width={24}
-                        height={24}
-                        loading="lazy"
-                      />
-                    </a>
-                  ))}
-                </div>
-
-                <div className="mt-6 space-y-1">{navItems.map((item) => renderMobileNavItem(item))}</div>
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
 
         {/* Bottom row with navigation - Desktop Only */}
