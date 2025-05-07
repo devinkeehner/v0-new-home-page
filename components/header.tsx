@@ -10,23 +10,23 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 // Restructured navigation items based on the new requirements
 const navItems = [
-  { name: "Contact", href: "https://www.cthousegop.com/contact/" },
+  { name: "Contact", href: "/contact" },
   {
     name: "Representatives",
     href: "#",
     children: [
-      { name: "Leadership Team", href: "https://www.cthousegop.com/leadership-team-2025/" },
-      { name: "Committee Assignments", href: "https://www.cthousegop.com/committees/" },
-      { name: "Caucus Members", href: "https://www.cthousegop.com/caucus-members/" },
+      { name: "Leadership Team", href: "/leadership-team" },
+      { name: "Committee Assignments", href: "/committees" },
+      { name: "Caucus Members", href: "/caucus-members" },
       { name: "Find a Legislator", href: "https://www.cga.ct.gov/asp/menu/CGAFindLeg.asp" },
     ],
   },
   {
     name: "Newsroom",
-    href: "https://www.cthousegop.com/caucus-newsroom/",
+    href: "/newsroom",
     children: [
-      { name: "Caucus Newsroom", href: "https://www.cthousegop.com/caucus-newsroom/" },
-      { name: "Media Inquiries", href: "https://www.cthousegop.com/communications-contacts/" },
+      { name: "Caucus Newsroom", href: "/newsroom" },
+      { name: "Media Inquiries", href: "/contact" },
     ],
   },
   {
@@ -50,10 +50,10 @@ const navItems = [
         name: "Caucus Resources",
         href: "#",
         children: [
-          { name: "Leadership Team", href: "https://www.cthousegop.com/leadership-team-2025/" },
-          { name: "House Republicans", href: "https://www.cthousegop.com" },
-          { name: "Caucus Newsroom", href: "https://www.cthousegop.com/caucus-newsroom/" },
-          { name: "Media Inquiries", href: "https://www.cthousegop.com/communications-contacts/" },
+          { name: "Leadership Team", href: "/leadership-team" },
+          { name: "House Republicans", href: "/" },
+          { name: "Caucus Newsroom", href: "/newsroom" },
+          { name: "Media Inquiries", href: "/contact" },
         ],
       },
       {
@@ -436,6 +436,27 @@ export function Header() {
                     />
                   </Link>
 
+                  {/* Social Icons - Mobile Sheet */}
+                  <div className="flex social-icons justify-between w-full px-2 my-4">
+                    {socialLinks.map((link) => (
+                      <a
+                        key={link.name}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={link.name}
+                      >
+                        <img
+                          src={link.icon || "/placeholder.svg"}
+                          alt={link.name}
+                          width={32}
+                          height={32}
+                          loading="lazy"
+                        />
+                      </a>
+                    ))}
+                  </div>
+
                   {/* Signup Form in Mobile Menu */}
                   <div className="my-6 p-4 bg-gray-50 rounded-lg">
                     <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
@@ -455,15 +476,10 @@ export function Header() {
                         required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
                       />
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 gap-2">
                         <input
                           type="tel"
                           placeholder="Mobile number"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Zip code"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         />
                       </div>
