@@ -1,0 +1,178 @@
+/* WordPress Content Styling */
+.wp-content {
+  /* Basic text styling */
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Headings */
+.wp-content h1,
+.wp-content h2,
+.wp-content h3,
+.wp-content h4,
+.wp-content h5,
+.wp-content h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 700;
+  color: #000042; /* primary-navy */
+}
+
+.wp-content h1 {
+  font-size: 2em;
+}
+.wp-content h2 {
+  font-size: 1.75em;
+}
+.wp-content h3 {
+  font-size: 1.5em;
+}
+.wp-content h4 {
+  font-size: 1.25em;
+}
+.wp-content h5 {
+  font-size: 1.1em;
+}
+.wp-content h6 {
+  font-size: 1em;
+}
+
+/* Paragraphs */
+.wp-content p {
+  margin-bottom: 1em;
+}
+
+/* Lists */
+.wp-content ul,
+.wp-content ol {
+  margin-bottom: 1em;
+  padding-left: 2em;
+}
+
+.wp-content ul {
+  list-style-type: disc;
+}
+
+.wp-content ol {
+  list-style-type: decimal;
+}
+
+.wp-content li {
+  margin-bottom: 0.5em;
+}
+
+/* Links */
+.wp-content a {
+  color: #a71e22; /* secondary-red */
+  text-decoration: none;
+}
+
+.wp-content a:hover {
+  text-decoration: underline;
+}
+
+/* Blockquotes */
+.wp-content blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid #b7c9e1; /* light-blue */
+  background-color: #f8f9fa;
+  font-style: italic;
+}
+
+/* Images */
+.wp-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+}
+
+.wp-content figure {
+  margin: 1em 0;
+}
+
+.wp-content figcaption {
+  font-size: 0.9em;
+  color: #666;
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+/* Tables */
+.wp-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.wp-content th,
+.wp-content td {
+  padding: 0.5em;
+  border: 1px solid #ddd;
+}
+
+.wp-content th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Code blocks */
+.wp-content pre {
+  background-color: #f5f5f5;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+  border-radius: 4px;
+}
+
+.wp-content code {
+  font-family: monospace;
+  background-color: #f5f5f5;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+/* Embeds (like YouTube) */
+.wp-content .wp-embed,
+.wp-content iframe {
+  max-width: 100%;
+  margin: 1em 0;
+}
+
+/* WordPress specific classes */
+.wp-content .alignleft {
+  float: left;
+  margin-right: 1em;
+  margin-bottom: 1em;
+}
+
+.wp-content .alignright {
+  float: right;
+  margin-left: 1em;
+  margin-bottom: 1em;
+}
+
+.wp-content .aligncenter {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wp-content .wp-caption {
+  max-width: 100%;
+}
+
+.wp-content .wp-caption-text {
+  font-size: 0.9em;
+  color: #666;
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+/* Clear floats */
+.wp-content:after {
+  content: "";
+  display: table;
+  clear: both;
+}

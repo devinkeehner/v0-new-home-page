@@ -1,16 +1,17 @@
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { Facebook, Twitter, Linkedin, Mail, Calendar } from "lucide-react"
+import { Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { fallbackPosts, formatWordPressDate, stripHtmlTags, getFeaturedImageUrl } from "@/lib/api"
+import "./post.css"
 
-// Function to fetch a single post by ID
-async function getPostById(id: string) {
+// Function to fetch a single post by slug
+async function getPostBySlug(slug: string) {
   try {
-    const response = await fetch(`https://www.cthousegop.com/wp-json/wp/v2/posts/${id}?_embed`, {
+    const response = await fetch(`https://www.cthousegop.com/wp-json/wp/v2/posts?slug=${slug}&_embed`, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -23,8 +24,14 @@ async function getPostById(id: string) {
       throw new Error(`Failed to fetch post: ${response.status}`)
     }
 
-    const post = await response.json()
-    return post
+    const posts = await response.json()
+
+    // The API returns an array, but we only need the first post
+    if (posts && posts.length > 0) {
+      return posts[0]
+    }
+
+    return null
   } catch (error) {
     console.error("Error fetching post:", error)
     return null
@@ -32,7 +39,7 @@ async function getPostById(id: string) {
 }
 
 // Function to fetch recent posts for the sidebar
-async function getRecentPosts(excludeId: string) {
+async function getRecentPosts(excludeId: number) {
   try {
     const response = await fetch(
       `https://www.cthousegop.com/wp-json/wp/v2/posts?per_page=2&exclude=${excludeId}&_embed`,
@@ -58,14 +65,14 @@ async function getRecentPosts(excludeId: string) {
   }
 }
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-  const post = await getPostById(params.id)
+export default async function PostPage({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug)
 
   if (!post) {
     notFound()
   }
 
-  const recentPosts = await getRecentPosts(params.id)
+  const recentPosts = await getRecentPosts(post.id)
   const featuredImageUrl = getFeaturedImageUrl(post)
 
   return (
@@ -98,53 +105,11 @@ export default async function PostPage({ params }: { params: { id: string } }) {
             <span>Posted on {formatWordPressDate(post.date)}</span>
           </div>
 
-          {/* Social Share Buttons */}
-          <div className="mb-6 flex space-x-2">
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=https://main.cthousegop.com/post/${params.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Share on Facebook"
-              >
-                <Facebook className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
-              <a
-                href={`https://twitter.com/intent/tweet?url=https://main.cthousegop.com/post/${params.id}&text=${encodeURIComponent(post.title.rendered)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Share on Twitter"
-              >
-                <Twitter className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
-              <a
-                href={`https://www.linkedin.com/shareArticle?mini=true&url=https://main.cthousegop.com/post/${params.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Share on LinkedIn"
-              >
-                <Linkedin className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full" asChild>
-              <a
-                href={`mailto:?subject=${encodeURIComponent(post.title.rendered)}&body=https://main.cthousegop.com/post/${params.id}`}
-                aria-label="Share via Email"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-
           <Separator className="mb-6" />
 
           {/* Post Content */}
           <div
-            className="prose max-w-none prose-headings:text-primary-navy prose-a:text-secondary-red"
+            className="wp-content prose max-w-none prose-headings:text-primary-navy prose-a:text-secondary-red"
             dangerouslySetInnerHTML={{ __html: post.content.rendered }}
           />
 
@@ -173,6 +138,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
             <div className="space-y-6">
               {recentPosts.map((recentPost: any) => {
                 const recentPostImageUrl = getFeaturedImageUrl(recentPost)
+                const recentPostSlug = recentPost.slug || `${recentPost.id}`
 
                 return (
                   <Card key={recentPost.id} className="overflow-hidden">
@@ -187,7 +153,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
                       </div>
                     )}
                     <CardContent className="p-4">
-                      <Link href={`/post/${recentPost.id}`}>
+                      <Link href={`/post/${recentPostSlug}`}>
                         <h3
                           className="mb-2 text-lg font-bold text-secondary-red hover:underline"
                           dangerouslySetInnerHTML={{ __html: recentPost.title.rendered }}
@@ -198,7 +164,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
                         {stripHtmlTags(recentPost.excerpt.rendered)}
                       </p>
                       <Button asChild className="bg-secondary-red hover:bg-secondary-red/90" size="sm">
-                        <Link href={`/post/${recentPost.id}`}>Read More</Link>
+                        <Link href={`/post/${recentPostSlug}`}>Read More</Link>
                       </Button>
                     </CardContent>
                   </Card>

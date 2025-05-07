@@ -15,14 +15,6 @@ export default function Loading() {
           {/* Date Skeleton */}
           <Skeleton className="mb-4 h-5 w-40" />
 
-          {/* Social Share Buttons Skeleton */}
-          <div className="mb-6 flex space-x-2">
-            <Skeleton className="h-9 w-9 rounded-full" />
-            <Skeleton className="h-9 w-9 rounded-full" />
-            <Skeleton className="h-9 w-9 rounded-full" />
-            <Skeleton className="h-9 w-9 rounded-full" />
-          </div>
-
           <Skeleton className="mb-6 h-1 w-full" />
 
           {/* Post Content Skeleton */}
