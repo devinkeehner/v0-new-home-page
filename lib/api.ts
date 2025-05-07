@@ -1,3 +1,5 @@
+// Update the existing api.ts file to include content rendering
+
 // Sample fallback data in case the API fails
 export const fallbackPosts = [
   {
@@ -8,6 +10,10 @@ export const fallbackPosts = [
     excerpt: {
       rendered:
         "House Republican Leader on Wednesday released the following statement in response to his vote on the re-appointment of Chairman of the Public Utilities Regulatory Authority...",
+    },
+    content: {
+      rendered:
+        "<p>House Republican Leader on Wednesday released the following statement in response to his vote on the re-appointment of Chairman of the Public Utilities Regulatory Authority...</p><p>This is fallback content for when the API fails to load the actual content.</p>",
     },
     date: "2023-04-09T10:30:00",
     link: "https://www.cthousegop.com/news/1",
@@ -21,6 +27,10 @@ export const fallbackPosts = [
       rendered:
         "House Republican Leader this week joined Deputy Leader for an episode of The Capitol Rundown. Together, the Republican lawmakers touched on an array of issues on the legislative agenda—from tax policy and affordability to business competitiveness.",
     },
+    content: {
+      rendered:
+        "<p>House Republican Leader this week joined Deputy Leader for an episode of The Capitol Rundown. Together, the Republican lawmakers touched on an array of issues on the legislative agenda—from tax policy and affordability to business competitiveness.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
+    },
     date: "2023-04-05T14:15:00",
     link: "https://www.cthousegop.com/news/2",
   },
@@ -32,6 +42,10 @@ export const fallbackPosts = [
     excerpt: {
       rendered:
         "State Rep. Joe Zullo, House Minority Leader, and State Sen. Paul Cicarella on Tuesday applauded the approval of a $250,000 state grant to create planning for the expansion of the East Haven Family Resource Center.",
+    },
+    content: {
+      rendered:
+        "<p>State Rep. Joe Zullo, House Minority Leader, and State Sen. Paul Cicarella on Tuesday applauded the approval of a $250,000 state grant to create planning for the expansion of the East Haven Family Resource Center.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
     },
     date: "2023-03-11T09:45:00",
     link: "https://www.cthousegop.com/news/3",
@@ -45,6 +59,10 @@ export const fallbackPosts = [
       rendered:
         "Connecticut House Republicans today unveiled a series of budget proposals that would provide meaningful tax relief to residents and businesses across the state.",
     },
+    content: {
+      rendered:
+        "<p>Connecticut House Republicans today unveiled a series of budget proposals that would provide meaningful tax relief to residents and businesses across the state.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
+    },
     date: "2023-05-01T11:20:00",
     link: "https://www.cthousegop.com/news/4",
   },
@@ -57,6 +75,10 @@ export const fallbackPosts = [
       rendered:
         "House Republican Leaders today called for immediate action on several public safety bills that would address rising crime rates in Connecticut communities.",
     },
+    content: {
+      rendered:
+        "<p>House Republican Leaders today called for immediate action on several public safety bills that would address rising crime rates in Connecticut communities.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
+    },
     date: "2023-04-28T16:30:00",
     link: "https://www.cthousegop.com/news/5",
   },
@@ -68,6 +90,10 @@ export const fallbackPosts = [
     excerpt: {
       rendered:
         "House Republican Leaders unveiled a comprehensive education initiative aimed at addressing learning loss and improving educational outcomes for Connecticut students.",
+    },
+    content: {
+      rendered:
+        "<p>House Republican Leaders unveiled a comprehensive education initiative aimed at addressing learning loss and improving educational outcomes for Connecticut students.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
     },
     date: "2023-04-22T13:45:00",
     link: "https://www.cthousegop.com/news/6",

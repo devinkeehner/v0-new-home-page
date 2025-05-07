@@ -58,7 +58,7 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
 
     const interval = setInterval(() => {
       nextSlide()
-    }, 15000) // Changed from 7000 to 15000 (15 seconds) to slow down the carousel
+    }, 15000) // 15 seconds per slide
 
     return () => clearInterval(interval)
   }, [autoplay, currentIndex])
@@ -80,12 +80,7 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
 
     return (
       <Card key={post.id} className="flex h-full flex-col overflow-hidden">
-        <Link
-          href={post.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative h-48 w-full bg-muted transition-opacity hover:opacity-90"
-        >
+        <Link href={`/post/${post.id}`} className="relative h-48 w-full bg-muted transition-opacity hover:opacity-90">
           {imageUrl && (
             <div className="h-full w-full overflow-hidden">
               <img
@@ -98,12 +93,7 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
           )}
         </Link>
         <CardHeader>
-          <Link
-            href={post.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-secondary-red transition-colors"
-          >
+          <Link href={`/post/${post.id}`} className="hover:text-secondary-red transition-colors">
             <CardTitle
               className="line-clamp-2 text-lg text-primary-navy"
               dangerouslySetInnerHTML={{ __html: post.title.rendered }}
@@ -115,7 +105,7 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
           <p className="line-clamp-3 text-sm">{stripHtmlTags(post.excerpt.rendered)}</p>
         </CardContent>
         <CardFooter>
-          <Link href={post.link} target="_blank" rel="noopener noreferrer">
+          <Link href={`/post/${post.id}`}>
             <Button className="bg-secondary-red hover:bg-secondary-red/90">Read More</Button>
           </Link>
         </CardFooter>
