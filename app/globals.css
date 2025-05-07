@@ -271,15 +271,23 @@
 }
 
 .social-icons img {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
+}
+
+@media (max-width: 767px) {
+  .social-icons {
+    gap: 0;
+    padding: 8px 0;
+  }
+
+  .social-icons img {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 @media (min-width: 768px) {
-  .social-icons img {
-    width: 32px;
-    height: 32px;
-  }
   .social-icons {
     gap: 1rem;
   }

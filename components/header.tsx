@@ -436,27 +436,6 @@ export function Header() {
                     />
                   </Link>
 
-                  {/* Social Icons - Mobile Sheet */}
-                  <div className="flex social-icons justify-center my-4">
-                    {socialLinks.map((link) => (
-                      <a
-                        key={link.name}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={link.name}
-                      >
-                        <img
-                          src={link.icon || "/placeholder.svg"}
-                          alt={link.name}
-                          width={24}
-                          height={24}
-                          loading="lazy"
-                        />
-                      </a>
-                    ))}
-                  </div>
-
                   {/* Signup Form in Mobile Menu */}
                   <div className="my-6 p-4 bg-gray-50 rounded-lg">
                     <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
@@ -504,10 +483,10 @@ export function Header() {
           </div>
 
           {/* Social Icons - Mobile (below logo) */}
-          <div className="md:hidden flex social-icons justify-center mt-2">
+          <div className="md:hidden flex social-icons justify-between w-full mt-2 px-2">
             {socialLinks.map((link) => (
               <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.name}>
-                <img src={link.icon || "/placeholder.svg"} alt={link.name} width={24} height={24} loading="lazy" />
+                <img src={link.icon || "/placeholder.svg"} alt={link.name} width={32} height={32} loading="lazy" />
               </a>
             ))}
           </div>
