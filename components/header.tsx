@@ -111,6 +111,35 @@ const navItems = [
   },
 ]
 
+// Social media links
+const socialLinks = [
+  {
+    name: "Facebook",
+    href: "https://www.facebook.com/pages/Connecticut-House-Republicans/117202885876",
+    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/facebook.png",
+  },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/user/CTHouseRepublicans",
+    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/youtube.png",
+  },
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/cthousegop/",
+    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/instagram.png",
+  },
+  {
+    name: "X",
+    href: "https://x.com/cthousegop",
+    icon: "http://www.cthousegop.com/wp-content/uploads/2023/12/logo-black.png",
+  },
+  {
+    name: "Flickr",
+    href: "https://www.flickr.com/photos/cthouserepublicans/",
+    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/flickr.png",
+  },
+]
+
 export function Header() {
   const [activeDropdowns, setActiveDropdowns] = useState<string[]>([])
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
@@ -373,9 +402,10 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
-      <div className="container flex h-20 items-center justify-between">
-        <div className="flex items-center">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
+      <div className="container flex flex-col h-24">
+        {/* Top row with logo and social icons */}
+        <div className="flex justify-between items-center py-2">
+          <Link href="/" className="flex items-center space-x-2">
             <Image
               src="/images/ct-house-gop-logo.jpg"
               alt="Connecticut House Republicans"
@@ -384,36 +414,67 @@ export function Header() {
               className="h-14 w-auto"
             />
           </Link>
+
+          {/* Social Icons - Desktop Only */}
+          <div className="hidden md:flex social-icons">
+            {socialLinks.map((link) => (
+              <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.name}>
+                <img src={link.icon || "/placeholder.svg"} alt={link.name} width={32} height={32} loading="lazy" />
+              </a>
+            ))}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <Sheet>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost">
+                <span className="sr-only">Open main menu</span>
+                <Menu className="h-6 w-6" aria-hidden="true" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+              <div className="py-4">
+                <Link href="/" className="mb-6 flex items-center space-x-2">
+                  <Image
+                    src="/images/ct-house-gop-logo.jpg"
+                    alt="Connecticut House Republicans"
+                    width={150}
+                    height={40}
+                    className="h-10 w-auto"
+                  />
+                </Link>
+
+                {/* Social Icons - Mobile */}
+                <div className="flex social-icons justify-center my-4">
+                  {socialLinks.map((link) => (
+                    <a
+                      key={link.name}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={link.name}
+                    >
+                      <img
+                        src={link.icon || "/placeholder.svg"}
+                        alt={link.name}
+                        width={24}
+                        height={24}
+                        loading="lazy"
+                      />
+                    </a>
+                  ))}
+                </div>
+
+                <div className="mt-6 space-y-1">{navItems.map((item) => renderMobileNavItem(item))}</div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex md:items-center md:space-x-4 lg:space-x-6">
+        {/* Bottom row with navigation - Desktop Only */}
+        <nav className="hidden md:flex md:items-center md:space-x-4 lg:space-x-6 mt-auto pb-2 justify-end">
           {navItems.map((item) => renderDesktopNavItem(item))}
         </nav>
-
-        {/* Mobile Menu Button with Sheet */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" className="md:hidden">
-              <span className="sr-only">Open main menu</span>
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-            <div className="py-4">
-              <Link href="/" className="mb-6 flex items-center space-x-2">
-                <Image
-                  src="/images/ct-house-gop-logo.jpg"
-                  alt="Connecticut House Republicans"
-                  width={150}
-                  height={40}
-                  className="h-10 w-auto"
-                />
-              </Link>
-              <div className="mt-6 space-y-1">{navItems.map((item) => renderMobileNavItem(item))}</div>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </header>
   )

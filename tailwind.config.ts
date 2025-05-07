@@ -66,6 +66,7 @@ const config = {
       fontFamily: {
         heading: ["var(--font-heading)"],
         body: ["var(--font-body)"],
+        sans: ["var(--font-sans)"],
       },
       keyframes: {
         "accordion-down": {

@@ -52,7 +52,7 @@ const slides = [
     title: "Reality Check Budget",
     subtitle:
       "Sign up to receive updates about our Reality Check Budget and how it will benefit Connecticut residents.",
-    bgColor: "bg-white",
+    bgColor: "bg-gray-50",
     textColor: "text-primary-navy",
     dotIndex: 2,
   },
@@ -128,11 +128,11 @@ export function BudgetTaxSlider() {
             key={slide.id}
             className={cn("transition-all duration-700 ease-in-out", index === currentSlide ? "block" : "hidden")}
           >
-            <div className={cn("py-12 px-4", slide.bgColor)}>
+            <div className={cn("py-12 px-4 min-h-[600px] flex items-center", slide.bgColor)}>
               <div className="container mx-auto max-w-6xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h2 className={cn("text-4xl font-bold mb-4", slide.textColor)}>{slide.title}</h2>
+                    <h2 className={cn("text-4xl font-bold mb-4 font-sans", slide.textColor)}>{slide.title}</h2>
                     <p
                       className={cn(
                         "text-xl mb-6",
@@ -160,7 +160,49 @@ export function BudgetTaxSlider() {
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-red">*</span>
                           </div>
 
-                          {!isExpanded ? (
+                          {isExpanded ? (
+                            <>
+                              <div className="grid grid-cols-2 gap-3">
+                                <Input
+                                  type="tel"
+                                  name="mobile"
+                                  placeholder="Mobile number"
+                                  value={formData.mobile}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy"
+                                />
+                                <Input
+                                  type="text"
+                                  name="zipCode"
+                                  placeholder="Zip code"
+                                  value={formData.zipCode}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy"
+                                />
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <Input
+                                  type="text"
+                                  name="firstName"
+                                  placeholder="First name"
+                                  value={formData.firstName}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy"
+                                />
+                                <Input
+                                  type="text"
+                                  name="lastName"
+                                  placeholder="Last name"
+                                  value={formData.lastName}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy"
+                                />
+                              </div>
+                              <Button type="submit" className="w-full bg-secondary-red hover:bg-secondary-red/90">
+                                Sign Up for Updates
+                              </Button>
+                            </>
+                          ) : (
                             <div className="grid grid-cols-2 gap-3">
                               <Input
                                 type="tel"
@@ -179,66 +221,6 @@ export function BudgetTaxSlider() {
                                 Sign Up
                               </Button>
                             </div>
-                          ) : (
-                            <>
-                              <div className="grid grid-cols-5 gap-3">
-                                <Input
-                                  type="email"
-                                  name="email"
-                                  placeholder="Enter your email"
-                                  value={formData.email}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy col-span-3 hidden"
-                                />
-                                <Input
-                                  type="tel"
-                                  name="mobile"
-                                  placeholder="Mobile number"
-                                  value={formData.mobile}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy col-span-3"
-                                />
-                                <Input
-                                  type="text"
-                                  name="zipCode"
-                                  placeholder="Zip code"
-                                  value={formData.zipCode}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy col-span-2"
-                                />
-                              </div>
-                              <div className="grid grid-cols-5 gap-3">
-                                <Input
-                                  type="text"
-                                  name="firstName"
-                                  placeholder="First name"
-                                  value={formData.firstName}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy col-span-2"
-                                />
-                                <Input
-                                  type="text"
-                                  name="lastName"
-                                  placeholder="Last name"
-                                  value={formData.lastName}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy col-span-3"
-                                />
-                              </div>
-                              <div className="grid grid-cols-5 gap-3">
-                                <Input
-                                  type="text"
-                                  name="zipCode"
-                                  placeholder="Zip code"
-                                  value={formData.zipCode}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy col-span-1"
-                                />
-                                <Button type="submit" className="col-span-4 bg-secondary-red hover:bg-secondary-red/90">
-                                  Sign Up for Updates
-                                </Button>
-                              </div>
-                            </>
                           )}
                         </div>
                       </form>
@@ -324,7 +306,7 @@ export function BudgetTaxSlider() {
                           />
                         </div>
                         <Button className="mt-6 bg-secondary-red hover:bg-secondary-red/90" asChild>
-                          <a href="https://realitycheckbudget.com/" target="_blank" rel="noopener noreferrer">
+                          <a href="https://realitycheckct.com/" target="_blank" rel="noopener noreferrer">
                             Learn More <ExternalLink className="ml-2 h-4 w-4" />
                           </a>
                         </Button>

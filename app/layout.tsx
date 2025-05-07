@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Playfair_Display, Source_Sans_3 } from "next/font/google"
+import { Playfair_Display, Source_Sans_3, Work_Sans } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -19,6 +19,12 @@ const bodyFont = Source_Sans_3({
   variable: "--font-body",
 }) // Source Sans as specified
 
+const workSans = Work_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+})
+
 export const metadata: Metadata = {
   title: "Connecticut House Republicans",
   description: "Official website of the Connecticut House Republicans",
@@ -32,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${headingFont.variable} ${bodyFont.variable} font-body`}>
+      <body className={`${headingFont.variable} ${bodyFont.variable} ${workSans.variable} font-body`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <Header />
           <main>{children}</main>

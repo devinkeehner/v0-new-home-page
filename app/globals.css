@@ -51,7 +51,7 @@
   h4,
   h5,
   h6 {
-    @apply font-heading font-bold;
+    @apply font-sans font-bold;
   }
 }
 
@@ -250,4 +250,34 @@
 
 .mobile-dropdown.active {
   max-height: 500px; /* Adjust as needed */
+}
+
+/* Social icons */
+.social-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.social-icons a:hover {
+  opacity: 0.8;
+}
+
+.social-icons img {
+  width: 24px;
+  height: 24px;
+}
+
+@media (min-width: 768px) {
+  .social-icons img {
+    width: 32px;
+    height: 32px;
+  }
 }
