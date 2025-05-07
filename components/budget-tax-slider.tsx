@@ -8,34 +8,66 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react"
+
+// Define the tax relief options for the second slide
+const taxReliefOptions = [
+  {
+    id: "income-tax",
+    title: "Income Tax Reduction",
+    description: "Reduce the state income tax rate for middle-class families",
+  },
+  {
+    id: "property-tax",
+    title: "Property Tax Credit",
+    description: "Increase the property tax credit for homeowners",
+  },
+  {
+    id: "pension-tax",
+    title: "Pension & Social Security",
+    description: "Eliminate tax on pension and social security income",
+  },
+]
 
 // Define the slides for the main slider
 const slides = [
   {
-    id: "budget",
-    title: "Reality Check Budget",
-    subtitle: "A responsible budget plan that spends less while delivering real tax relief for Connecticut residents.",
+    id: "house-republicans",
+    title: "Connecticut House Republicans",
+    subtitle: "Fighting for Connecticut's families and businesses with common-sense solutions.",
     bgColor: "bg-primary-navy",
     textColor: "text-white",
     dotIndex: 0,
   },
   {
     id: "tax-relief",
-    title: "Tax Relief for Connecticut",
-    subtitle: "Our plan provides meaningful tax relief to residents and businesses across the state.",
+    title: "Choose Your Tax Relief",
+    subtitle: "Select tax relief options that align with your priorities for Connecticut residents and businesses.",
     bgColor: "bg-[#FFD700]",
     textColor: "text-primary-navy",
     dotIndex: 1,
+  },
+  {
+    id: "signup",
+    title: "Reality Check Budget",
+    subtitle:
+      "Sign up to receive updates about our Reality Check Budget and how it will benefit Connecticut residents.",
+    bgColor: "bg-white",
+    textColor: "text-primary-navy",
+    dotIndex: 2,
   },
 ]
 
 export function BudgetTaxSlider() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [autoplay, setAutoplay] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     mobile: "",
+    zipCode: "",
+    firstName: "",
+    lastName: "",
   })
 
   // Auto-advance slides
@@ -64,6 +96,12 @@ export function BudgetTaxSlider() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleFocus = () => {
+    if (!isExpanded) {
+      setIsExpanded(true)
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     toast({
@@ -74,7 +112,11 @@ export function BudgetTaxSlider() {
     setFormData({
       email: "",
       mobile: "",
+      zipCode: "",
+      firstName: "",
+      lastName: "",
     })
+    setIsExpanded(false)
   }
 
   return (
@@ -100,57 +142,166 @@ export function BudgetTaxSlider() {
                       {slide.subtitle}
                     </p>
 
-                    {/* Email signup form */}
-                    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-                      <div className="relative">
-                        <Input
-                          type="email"
-                          name="email"
-                          placeholder="Enter your email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                          className="bg-white text-primary-navy pr-6"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-red">*</span>
-                      </div>
+                    {/* First and Third Slide: Email signup form with expansion */}
+                    {(index === 0 || index === 2) && (
+                      <form onSubmit={handleSubmit} className="w-full max-w-md">
+                        <div className="space-y-3">
+                          <div className="relative">
+                            <Input
+                              type="email"
+                              name="email"
+                              placeholder="Enter your email"
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              onFocus={handleFocus}
+                              required
+                              className="bg-white pr-6 text-primary-navy"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-red">*</span>
+                          </div>
 
-                      <div className="flex gap-3">
-                        <Input
-                          type="tel"
-                          name="mobile"
-                          placeholder="Mobile number"
-                          value={formData.mobile}
-                          onChange={handleInputChange}
-                          className="bg-white text-primary-navy"
-                        />
-                        <Button type="submit" className="bg-secondary-red hover:bg-secondary-red/90 whitespace-nowrap">
-                          Sign Up
-                        </Button>
-                      </div>
-                    </form>
+                          {!isExpanded ? (
+                            <div className="grid grid-cols-2 gap-3">
+                              <Input
+                                type="tel"
+                                name="mobile"
+                                placeholder="Mobile number"
+                                value={formData.mobile}
+                                onChange={handleInputChange}
+                                onFocus={handleFocus}
+                                className="bg-white text-primary-navy"
+                              />
+                              <Button
+                                type="submit"
+                                className="bg-secondary-red hover:bg-secondary-red/90"
+                                onClick={handleFocus}
+                              >
+                                Sign Up
+                              </Button>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="grid grid-cols-5 gap-3">
+                                <Input
+                                  type="email"
+                                  name="email"
+                                  placeholder="Enter your email"
+                                  value={formData.email}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy col-span-3 hidden"
+                                />
+                                <Input
+                                  type="tel"
+                                  name="mobile"
+                                  placeholder="Mobile number"
+                                  value={formData.mobile}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy col-span-3"
+                                />
+                                <Input
+                                  type="text"
+                                  name="zipCode"
+                                  placeholder="Zip code"
+                                  value={formData.zipCode}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy col-span-2"
+                                />
+                              </div>
+                              <div className="grid grid-cols-5 gap-3">
+                                <Input
+                                  type="text"
+                                  name="firstName"
+                                  placeholder="First name"
+                                  value={formData.firstName}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy col-span-2"
+                                />
+                                <Input
+                                  type="text"
+                                  name="lastName"
+                                  placeholder="Last name"
+                                  value={formData.lastName}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy col-span-3"
+                                />
+                              </div>
+                              <div className="grid grid-cols-5 gap-3">
+                                <Input
+                                  type="text"
+                                  name="zipCode"
+                                  placeholder="Zip code"
+                                  value={formData.zipCode}
+                                  onChange={handleInputChange}
+                                  className="bg-white text-primary-navy col-span-1"
+                                />
+                                <Button type="submit" className="col-span-4 bg-secondary-red hover:bg-secondary-red/90">
+                                  Sign Up for Updates
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </form>
+                    )}
 
-                    <p
-                      className={cn(
-                        "mt-4 text-sm",
-                        slide.textColor === "text-white" ? "text-white/80" : "text-gray-700",
-                      )}
-                    >
-                      Stay informed with the latest news and updates from our caucus.
-                    </p>
+                    {/* Second Slide: Tax Relief Options */}
+                    {index === 1 && (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {taxReliefOptions.map((option) => (
+                            <div key={option.id} className="flex flex-col">
+                              <a
+                                href="https://realitycheckct.com/#choose-your-tax-relief"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <div className="bg-white rounded-lg border-2 border-primary-navy p-4 h-full hover:bg-primary-navy/5 transition-colors">
+                                  <h3 className="font-bold text-primary-navy text-center mb-2">{option.title}</h3>
+                                  <p className="text-sm text-gray-800 text-center">{option.description}</p>
+                                </div>
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex justify-center">
+                          <Button className="bg-secondary-red hover:bg-secondary-red/90" asChild>
+                            <a
+                              href="https://realitycheckct.com/#choose-your-tax-relief"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center"
+                            >
+                              Choose Your Own Tax Relief <ExternalLink className="ml-2 h-4 w-4" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* First Slide: Additional text */}
+                    {index === 0 && (
+                      <p className="mt-2 text-sm text-white/80">
+                        Stay informed with the latest news and updates from our caucus.
+                      </p>
+                    )}
                   </div>
 
-                  <div className="flex justify-center">
-                    {slide.id === "budget" ? (
-                      <div className="relative h-64 w-64 md:h-80 md:w-80">
+                  <div className="flex items-center justify-center">
+                    {/* First Slide: Circular Logo */}
+                    {index === 0 && (
+                      <div className="relative h-64 w-64 overflow-hidden rounded-full border-4 border-white md:h-80 md:w-80">
                         <Image
-                          src="/images/ct-house-gop-logo.jpg"
+                          src="/images/ct-house-gop-optimized.webp"
                           alt="Connecticut House Republicans"
                           fill
                           className="object-contain"
                         />
                       </div>
-                    ) : (
+                    )}
+
+                    {/* Second Slide: Tax Relief Image */}
+                    {index === 1 && (
                       <div className="relative h-64 w-64 md:h-80 md:w-80">
                         <div className="absolute inset-0 rounded-full bg-white shadow-lg flex items-center justify-center">
                           <div className="text-center p-8">
@@ -158,6 +309,25 @@ export function BudgetTaxSlider() {
                             <div className="text-xl text-green-600 mt-2">Total Tax Relief</div>
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Third Slide: Budget Website Logo */}
+                    {index === 2 && (
+                      <div className="flex flex-col items-center">
+                        <div className="relative h-64 w-64 md:h-80 md:w-80">
+                          <Image
+                            src="https://www.cthousegop.com/wp-content/uploads/2025/05/BUDGET-WEBSITE-LOGO-e1746106410465.png"
+                            alt="Budget Website Logo"
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                        <Button className="mt-6 bg-secondary-red hover:bg-secondary-red/90" asChild>
+                          <a href="https://realitycheckbudget.com/" target="_blank" rel="noopener noreferrer">
+                            Learn More <ExternalLink className="ml-2 h-4 w-4" />
+                          </a>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -190,7 +360,7 @@ export function BudgetTaxSlider() {
 
       {/* Slide Indicators */}
       <div className="flex justify-center py-4">
-        {slides.map((slide, index) => (
+        {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => {
@@ -200,9 +370,9 @@ export function BudgetTaxSlider() {
             className={cn(
               "h-2 w-8 mx-1 rounded-full transition-colors",
               currentSlide === index
-                ? index === 0
-                  ? "bg-secondary-red"
-                  : "bg-primary-navy"
+                ? index === 1
+                  ? "bg-primary-navy"
+                  : "bg-secondary-red"
                 : "bg-gray-300 hover:bg-gray-400",
             )}
             aria-label={`Go to slide ${index + 1}`}

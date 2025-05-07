@@ -20,10 +20,10 @@ export default async function Home() {
 
   return (
     <>
-      <Hero />
+      {/* temporarly removed by user <Hero /> */}
       <BudgetTaxSlider />
-      <BudgetSection />
-      <TaxReliefSection />
+      {/* temporarly removed by user <BudgetSection />*/}
+      {/* temporarly removed by user <TaxReliefSection />*/}
       <NewsCarousel posts={posts} />
       <SocialFeedEmbed />
       <PhotoGallery />

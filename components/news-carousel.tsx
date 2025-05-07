@@ -58,7 +58,7 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
 
     const interval = setInterval(() => {
       nextSlide()
-    }, 7000)
+    }, 15000) // Changed from 7000 to 15000 (15 seconds) to slow down the carousel
 
     return () => clearInterval(interval)
   }, [autoplay, currentIndex])
