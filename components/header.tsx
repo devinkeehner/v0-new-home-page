@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { XIcon } from "./icons/x-icon"
 import { FlickrIcon } from "./icons/flickr-icon"
-import { toast } from "@/components/ui/use-toast"
 
 // Social media links
 const socialLinks = [
@@ -151,6 +150,7 @@ export function Header() {
     lastName: "",
   })
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false)
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -266,20 +266,20 @@ export function Header() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Here you would typically send the data to your newsletter service
-    toast({
-      title: "Success!",
-      description: "You've been signed up for our newsletter.",
-    })
+    setFormSubmitted(true)
 
-    // Reset form
-    setFormData({
-      email: "",
-      mobile: "",
-      zipCode: "",
-      firstName: "",
-      lastName: "",
-    })
-    setIsSignupExpanded(false)
+    // Reset after 5 seconds
+    setTimeout(() => {
+      setFormSubmitted(false)
+      setFormData({
+        email: "",
+        mobile: "",
+        zipCode: "",
+        firstName: "",
+        lastName: "",
+      })
+      setIsSignupExpanded(false)
+    }, 5000)
   }
 
   const renderDesktopNavItem = (item: any, path = "") => {
@@ -395,87 +395,48 @@ export function Header() {
     )
   }
 
-  const renderMobileNavItem = (item: any, depth = 0, path = "") => {
+  // Completely rewritten mobile navigation rendering
+  const MobileNavItem = ({ item, depth = 0, path = "" }: { item: any; depth?: number; path?: string }) => {
     const hasChildren = item.children && item.children.length > 0
     const currentPath = path ? `${path}-${item.name}` : item.name
     const isActive = isDropdownActive(currentPath)
 
+    // If this is a direct link with no children
     if (!hasChildren) {
       return (
-        <Link
-          key={currentPath}
-          href={item.href}
-          className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-          onClick={() => setMobileMenuOpen(false)}
-          target={item.href.startsWith("http") ? "_blank" : undefined}
-          rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-        >
-          {item.name}
-        </Link>
+        <div className={cn(depth > 0 ? "ml-4" : "")}>
+          <Link
+            href={item.href}
+            className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
+            onClick={() => setMobileMenuOpen(false)}
+            target={item.href.startsWith("http") ? "_blank" : undefined}
+            rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+          >
+            {item.name}
+          </Link>
+        </div>
       )
     }
 
+    // If this has children (dropdown)
     return (
-      <div key={currentPath} className={cn(depth > 0 ? "ml-4" : "")}>
+      <div className={cn(depth > 0 ? "ml-4" : "")}>
         <button
           className="flex w-full items-center justify-between rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-          onClick={(e) => toggleDropdown(currentPath, e)}
+          onClick={(e) => {
+            e.preventDefault()
+            toggleDropdown(currentPath)
+          }}
         >
           {item.name}
           <ChevronDown className={cn("h-4 w-4 transition-transform", isActive ? "rotate-180" : "")} />
         </button>
 
         {isActive && (
-          <div className="mt-1 space-y-1 pl-4">
-            {item.children.map((child: any) => {
-              const childHasChildren = child.children && child.children.length > 0
-              const childPath = `${currentPath}-${child.name}`
-              const isChildActive = isDropdownActive(childPath)
-
-              if (!childHasChildren) {
-                return (
-                  <Link
-                    key={childPath}
-                    href={child.href}
-                    className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-                    onClick={() => setMobileMenuOpen(false)}
-                    target={child.href.startsWith("http") ? "_blank" : undefined}
-                    rel={child.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  >
-                    {child.name}
-                  </Link>
-                )
-              }
-
-              return (
-                <div key={childPath}>
-                  <button
-                    className="flex w-full items-center justify-between rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-                    onClick={(e) => toggleDropdown(childPath, e)}
-                  >
-                    {child.name}
-                    <ChevronDown className={cn("h-4 w-4 transition-transform", isChildActive ? "rotate-180" : "")} />
-                  </button>
-
-                  {isChildActive && (
-                    <div className="mt-1 space-y-1 pl-4">
-                      {child.children.map((grandchild: any) => (
-                        <Link
-                          key={`${childPath}-${grandchild.name}`}
-                          href={grandchild.href}
-                          className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-                          onClick={() => setMobileMenuOpen(false)}
-                          target={grandchild.href.startsWith("http") ? "_blank" : undefined}
-                          rel={grandchild.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                        >
-                          {grandchild.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+          <div className="mt-1 space-y-1">
+            {item.children.map((child: any, index: number) => (
+              <MobileNavItem key={index} item={child} depth={depth + 1} path={currentPath} />
+            ))}
           </div>
         )}
       </div>
@@ -521,100 +482,124 @@ export function Header() {
                   {/* Signup Form in Mobile Menu - Updated to match slider */}
                   <div className="my-6 p-4 bg-gray-50 rounded-lg">
                     <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
-                    <form onSubmit={handleSubmit} className="space-y-3">
-                      {/* Row 1: Email (3/5) and Mobile (2/5) */}
-                      <div className="grid grid-cols-5 gap-2">
-                        <div className="col-span-3 relative">
-                          <input
-                            type="email"
-                            name="email"
-                            placeholder="Email address"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            onFocus={handleFocus}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          />
+
+                    {formSubmitted ? (
+                      <div className="text-center py-4">
+                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6 text-green-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
                         </div>
-                        <div className="col-span-2">
-                          <input
-                            type="tel"
-                            name="mobile"
-                            placeholder="Mobile number"
-                            value={formData.mobile}
-                            onChange={handleInputChange}
-                            onFocus={handleFocus}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-1">Thank you for signing up!</h4>
+                        <p className="text-gray-600 mb-4">You'll receive updates from Connecticut House Republicans.</p>
                       </div>
-
-                      {!isSignupExpanded && (
-                        <button
-                          type="button"
-                          className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
-                          onClick={handleFocus}
-                        >
-                          Sign Up
-                        </button>
-                      )}
-
-                      <div
-                        className={cn(
-                          "space-y-3 overflow-hidden transition-all duration-500 ease-in-out",
-                          isSignupExpanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
-                        )}
-                      >
-                        {/* Row 2: First name (2/5) and Last name (3/5) */}
+                    ) : (
+                      <form onSubmit={handleSubmit} className="space-y-3">
+                        {/* Row 1: Email (3/5) and Mobile (2/5) */}
                         <div className="grid grid-cols-5 gap-2">
+                          <div className="col-span-3 relative">
+                            <input
+                              type="email"
+                              name="email"
+                              placeholder="Email address"
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              onFocus={handleFocus}
+                              required
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            />
+                          </div>
                           <div className="col-span-2">
                             <input
-                              type="text"
-                              name="firstName"
-                              placeholder="First name"
-                              value={formData.firstName}
+                              type="tel"
+                              name="mobile"
+                              placeholder="Mobile number"
+                              value={formData.mobile}
                               onChange={handleInputChange}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            />
-                          </div>
-                          <div className="col-span-3">
-                            <input
-                              type="text"
-                              name="lastName"
-                              placeholder="Last name"
-                              value={formData.lastName}
-                              onChange={handleInputChange}
+                              onFocus={handleFocus}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md"
                             />
                           </div>
                         </div>
 
-                        {/* Row 3: Zip code (1/5) and Submit button (4/5) */}
-                        <div className="grid grid-cols-5 gap-2">
-                          <div className="col-span-1">
-                            <input
-                              type="text"
-                              name="zipCode"
-                              placeholder="Zip"
-                              value={formData.zipCode}
-                              onChange={handleInputChange}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            />
+                        {!isSignupExpanded && (
+                          <button
+                            type="button"
+                            className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
+                            onClick={handleFocus}
+                          >
+                            Sign Up
+                          </button>
+                        )}
+
+                        <div
+                          className={cn(
+                            "space-y-3 overflow-hidden transition-all duration-500 ease-in-out",
+                            isSignupExpanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
+                          )}
+                        >
+                          {/* Row 2: First name (2/5) and Last name (3/5) */}
+                          <div className="grid grid-cols-5 gap-2">
+                            <div className="col-span-2">
+                              <input
+                                type="text"
+                                name="firstName"
+                                placeholder="First name"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                            </div>
+                            <div className="col-span-3">
+                              <input
+                                type="text"
+                                name="lastName"
+                                placeholder="Last name"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                            </div>
                           </div>
-                          <div className="col-span-4">
-                            <button
-                              type="submit"
-                              className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
-                            >
-                              Sign Up for Updates
-                            </button>
+
+                          {/* Row 3: Zip code (1/5) and Submit button (4/5) */}
+                          <div className="grid grid-cols-5 gap-2">
+                            <div className="col-span-1">
+                              <input
+                                type="text"
+                                name="zipCode"
+                                placeholder="Zip"
+                                value={formData.zipCode}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                            </div>
+                            <div className="col-span-4">
+                              <button
+                                type="submit"
+                                className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
+                              >
+                                Sign Up for Updates
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </form>
+                      </form>
+                    )}
                   </div>
 
-                  <div className="mt-6 space-y-1">{navItems.map((item) => renderMobileNavItem(item))}</div>
+                  {/* Completely rewritten mobile navigation */}
+                  <div className="mt-6 space-y-1">
+                    {navItems.map((item, index) => (
+                      <MobileNavItem key={index} item={item} />
+                    ))}
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
