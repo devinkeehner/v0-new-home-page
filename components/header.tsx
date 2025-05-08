@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { XIcon } from "./icons/x-icon"
 import { FlickrIcon } from "./icons/flickr-icon"
+import { useRouter } from "next/navigation"
 
 // Social media links
 const socialLinks = [
@@ -138,6 +139,7 @@ const navItems = [
 ]
 
 export function Header() {
+  const router = useRouter()
   const [activeDropdowns, setActiveDropdowns] = useState<string[]>([])
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({})
@@ -401,38 +403,53 @@ export function Header() {
     const currentPath = path ? `${path}-${item.name}` : item.name
     const isActive = isDropdownActive(currentPath)
 
-    // If this is a direct link with no children
-    if (!hasChildren) {
-      return (
-        <div className={cn(depth > 0 ? "ml-4" : "")}>
-          <Link
-            href={item.href}
-            className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-            onClick={() => setMobileMenuOpen(false)}
-            target={item.href.startsWith("http") ? "_blank" : undefined}
-            rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-          >
-            {item.name}
-          </Link>
-        </div>
-      )
+    // Function to navigate to the item's href
+    const navigateToLink = () => {
+      if (item.href && item.href !== "#") {
+        if (item.href.startsWith("http")) {
+          window.open(item.href, "_blank", "noopener,noreferrer")
+        } else {
+          router.push(item.href)
+        }
+        setMobileMenuOpen(false)
+      }
     }
 
-    // If this has children (dropdown)
     return (
       <div className={cn(depth > 0 ? "ml-4" : "")}>
-        <button
-          className="flex w-full items-center justify-between rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-          onClick={(e) => {
-            e.preventDefault()
-            toggleDropdown(currentPath)
-          }}
-        >
-          {item.name}
-          <ChevronDown className={cn("h-4 w-4 transition-transform", isActive ? "rotate-180" : "")} />
-        </button>
+        <div className="flex items-center justify-between">
+          {/* The item name/text that navigates when clicked */}
+          <button
+            className={cn(
+              "flex-grow text-left rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted",
+              item.href === "#" && "cursor-default",
+            )}
+            onClick={() => {
+              if (item.href && item.href !== "#") {
+                navigateToLink()
+              }
+            }}
+          >
+            {item.name}
+          </button>
 
-        {isActive && (
+          {/* The dropdown toggle button that only appears for items with children */}
+          {hasChildren && (
+            <button
+              className="p-2 rounded-md hover:bg-muted"
+              onClick={(e) => {
+                e.stopPropagation()
+                toggleDropdown(currentPath)
+              }}
+              aria-label={isActive ? "Collapse" : "Expand"}
+            >
+              <ChevronDown className={cn("h-4 w-4 transition-transform", isActive ? "rotate-180" : "")} />
+            </button>
+          )}
+        </div>
+
+        {/* Dropdown content */}
+        {isActive && hasChildren && (
           <div className="mt-1 space-y-1">
             {item.children.map((child: any, index: number) => (
               <MobileNavItem key={index} item={child} depth={depth + 1} path={currentPath} />

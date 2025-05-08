@@ -229,11 +229,11 @@ export function BudgetTaxSlider() {
                               index === 0 ? "bg-opacity-90 text-white border-white/30" : "",
                             )}
                           >
-                            <CheckCircle className={cn("h-5 w-5 text-green-500", index === 0 ? "text-white" : "")} />
-                            <AlertTitle className={index === 0 ? "text-white" : ""}>
+                            <CheckCircle className={cn("h-5 w-5 text-green-500", index === 0 ? "text-black" : "")} />
+                            <AlertTitle className={index === 0 ? "text-black" : ""}>
                               Thank you for signing up!
                             </AlertTitle>
-                            <AlertDescription className={index === 0 ? "text-white/90" : ""}>
+                            <AlertDescription className={index === 0 ? "text-black/90" : ""}>
                               You've been successfully added to our mailing list. We'll keep you updated with the latest
                               news and information.
                             </AlertDescription>
@@ -242,7 +242,7 @@ export function BudgetTaxSlider() {
                               variant="outline"
                               className={cn(
                                 "mt-2",
-                                index === 0 ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : "",
+                                index === 0 ? "border-white/30 text-black hover:bg-white/10 hover:text-white" : "",
                               )}
                             >
                               Sign up another email
