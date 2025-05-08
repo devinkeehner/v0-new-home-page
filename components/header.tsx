@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { XIcon } from "./icons/x-icon"
 import { FlickrIcon } from "./icons/flickr-icon"
-import { useRouter } from "next/navigation"
 
 // Social media links
 const socialLinks = [
@@ -139,20 +138,11 @@ const navItems = [
 ]
 
 export function Header() {
-  const router = useRouter()
   const [activeDropdowns, setActiveDropdowns] = useState<string[]>([])
+  const [sheetActiveDropdowns, setSheetActiveDropdowns] = useState<string[]>([])
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({})
-  const [isSignupExpanded, setIsSignupExpanded] = useState(false)
-  const [formData, setFormData] = useState({
-    email: "",
-    mobile: "",
-    zipCode: "",
-    firstName: "",
-    lastName: "",
-  })
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [formSubmitted, setFormSubmitted] = useState(false)
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -202,8 +192,30 @@ export function Header() {
     })
   }
 
+  const toggleSheetDropdown = (path: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+
+    setSheetActiveDropdowns((current) => {
+      // Check if this path is already active
+      if (current.includes(path)) {
+        // If active, remove it and its children
+        return current.filter((id) => id !== path && !id.startsWith(`${path}-`))
+      } else {
+        // If not active, add it
+        return [...current, path]
+      }
+    })
+  }
+
   const isDropdownActive = (path: string) => {
     return activeDropdowns.includes(path) || activeDropdowns.some((id) => id.startsWith(`${path}-`))
+  }
+
+  const isSheetDropdownActive = (path: string) => {
+    return sheetActiveDropdowns.includes(path) || sheetActiveDropdowns.some((id) => id.startsWith(`${path}-`))
   }
 
   const handleMouseEnter = (path: string) => {
@@ -252,36 +264,6 @@ export function Header() {
   // Determine if a menu should open to the left instead of right
   const shouldOpenLeft = (itemName: string) => {
     return itemName === "Resources"
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleFocus = () => {
-    if (!isSignupExpanded) {
-      setIsSignupExpanded(true)
-    }
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically send the data to your newsletter service
-    setFormSubmitted(true)
-
-    // Reset after 5 seconds
-    setTimeout(() => {
-      setFormSubmitted(false)
-      setFormData({
-        email: "",
-        mobile: "",
-        zipCode: "",
-        firstName: "",
-        lastName: "",
-      })
-      setIsSignupExpanded(false)
-    }, 5000)
   }
 
   const renderDesktopNavItem = (item: any, path = "") => {
@@ -397,63 +379,52 @@ export function Header() {
     )
   }
 
-  // Completely rewritten mobile navigation rendering
-  const MobileNavItem = ({ item, depth = 0, path = "" }: { item: any; depth?: number; path?: string }) => {
+  // Sheet navigation item renderer
+  const renderSheetNavItem = (item: any, path = "", depth = 0) => {
     const hasChildren = item.children && item.children.length > 0
     const currentPath = path ? `${path}-${item.name}` : item.name
-    const isActive = isDropdownActive(currentPath)
+    const isActive = isSheetDropdownActive(currentPath)
 
-    // Function to navigate to the item's href
-    const navigateToLink = () => {
-      if (item.href && item.href !== "#") {
-        if (item.href.startsWith("http")) {
-          window.open(item.href, "_blank", "noopener,noreferrer")
-        } else {
-          router.push(item.href)
-        }
-        setMobileMenuOpen(false)
-      }
+    if (!hasChildren) {
+      return (
+        <Link
+          key={currentPath}
+          href={item.href}
+          className={cn(
+            "block py-2 text-base font-medium text-primary-navy hover:text-secondary-red",
+            depth === 0 ? "border-b border-gray-200" : "",
+            depth === 1 ? "pl-4" : "",
+            depth === 2 ? "pl-8" : "",
+            depth === 3 ? "pl-12" : "",
+          )}
+          onClick={() => setMobileMenuOpen(false)}
+          target={item.href.startsWith("http") ? "_blank" : undefined}
+          rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+        >
+          {item.name}
+        </Link>
+      )
     }
 
     return (
-      <div className={cn(depth > 0 ? "ml-4" : "")}>
-        <div className="flex items-center justify-between">
-          {/* The item name/text that navigates when clicked */}
-          <button
-            className={cn(
-              "flex-grow text-left rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted",
-              item.href === "#" && "cursor-default",
-            )}
-            onClick={() => {
-              if (item.href && item.href !== "#") {
-                navigateToLink()
-              }
-            }}
-          >
-            {item.name}
-          </button>
-
-          {/* The dropdown toggle button that only appears for items with children */}
-          {hasChildren && (
-            <button
-              className="p-2 rounded-md hover:bg-muted"
-              onClick={(e) => {
-                e.stopPropagation()
-                toggleDropdown(currentPath)
-              }}
-              aria-label={isActive ? "Collapse" : "Expand"}
-            >
-              <ChevronDown className={cn("h-4 w-4 transition-transform", isActive ? "rotate-180" : "")} />
-            </button>
+      <div key={currentPath} className={cn(depth === 0 ? "border-b border-gray-200" : "")}>
+        <button
+          className={cn(
+            "flex w-full items-center justify-between py-2 text-base font-medium text-primary-navy hover:text-secondary-red",
+            depth === 1 ? "pl-4" : "",
+            depth === 2 ? "pl-8" : "",
+            depth === 3 ? "pl-12" : "",
           )}
-        </div>
+          onClick={() => toggleSheetDropdown(currentPath)}
+          aria-expanded={isActive}
+        >
+          {item.name}
+          <ChevronDown className={cn("h-4 w-4 transition-transform", isActive ? "rotate-180" : "")} />
+        </button>
 
-        {/* Dropdown content */}
-        {isActive && hasChildren && (
-          <div className="mt-1 space-y-1">
-            {item.children.map((child: any, index: number) => (
-              <MobileNavItem key={index} item={child} depth={depth + 1} path={currentPath} />
-            ))}
+        {isActive && (
+          <div className={cn("py-1", depth === 0 ? "" : "")}>
+            {item.children.map((child: any) => renderSheetNavItem(child, currentPath, depth + 1))}
           </div>
         )}
       </div>
@@ -496,127 +467,8 @@ export function Header() {
                     />
                   </Link>
 
-                  {/* Signup Form in Mobile Menu - Updated to match slider */}
-                  <div className="my-6 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
-
-                    {formSubmitted ? (
-                      <div className="text-center py-4">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6 text-green-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-1">Thank you for signing up!</h4>
-                        <p className="text-gray-600 mb-4">You'll receive updates from Connecticut House Republicans.</p>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleSubmit} className="space-y-3">
-                        {/* Row 1: Email (3/5) and Mobile (2/5) */}
-                        <div className="grid grid-cols-5 gap-2">
-                          <div className="col-span-3 relative">
-                            <input
-                              type="email"
-                              name="email"
-                              placeholder="Email address"
-                              value={formData.email}
-                              onChange={handleInputChange}
-                              onFocus={handleFocus}
-                              required
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <input
-                              type="tel"
-                              name="mobile"
-                              placeholder="Mobile number"
-                              value={formData.mobile}
-                              onChange={handleInputChange}
-                              onFocus={handleFocus}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            />
-                          </div>
-                        </div>
-
-                        {!isSignupExpanded && (
-                          <button
-                            type="button"
-                            className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
-                            onClick={handleFocus}
-                          >
-                            Sign Up
-                          </button>
-                        )}
-
-                        <div
-                          className={cn(
-                            "space-y-3 overflow-hidden transition-all duration-500 ease-in-out",
-                            isSignupExpanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
-                          )}
-                        >
-                          {/* Row 2: First name (2/5) and Last name (3/5) */}
-                          <div className="grid grid-cols-5 gap-2">
-                            <div className="col-span-2">
-                              <input
-                                type="text"
-                                name="firstName"
-                                placeholder="First name"
-                                value={formData.firstName}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                              />
-                            </div>
-                            <div className="col-span-3">
-                              <input
-                                type="text"
-                                name="lastName"
-                                placeholder="Last name"
-                                value={formData.lastName}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Row 3: Zip code (1/5) and Submit button (4/5) */}
-                          <div className="grid grid-cols-5 gap-2">
-                            <div className="col-span-1">
-                              <input
-                                type="text"
-                                name="zipCode"
-                                placeholder="Zip"
-                                value={formData.zipCode}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                              />
-                            </div>
-                            <div className="col-span-4">
-                              <button
-                                type="submit"
-                                className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
-                              >
-                                Sign Up for Updates
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </form>
-                    )}
-                  </div>
-
-                  {/* Completely rewritten mobile navigation */}
-                  <div className="mt-6 space-y-1">
-                    {navItems.map((item, index) => (
-                      <MobileNavItem key={index} item={item} />
-                    ))}
-                  </div>
+                  {/* Sheet Navigation */}
+                  <div className="mt-6 space-y-1">{navItems.map((item) => renderSheetNavItem(item))}</div>
                 </div>
               </SheetContent>
             </Sheet>
