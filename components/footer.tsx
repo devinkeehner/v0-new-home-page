@@ -76,42 +76,22 @@ export function Footer() {
             <h3 className="mb-4 text-lg font-bold">Caucus Resources</h3>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="https://www.cthousegop.com/leadership-team-2025/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white"
-                >
+                <Link href="/leadership-team" className="text-white/80 hover:text-white">
                   Leadership Team
                 </Link>
               </li>
               <li>
-                <Link
-                  href="https://www.cthousegop.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white"
-                >
+                <Link href="/" className="text-white/80 hover:text-white">
                   House Republicans
                 </Link>
               </li>
               <li>
-                <Link
-                  href="https://www.cthousegop.com/caucus-newsroom/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white"
-                >
+                <Link href="/newsroom" className="text-white/80 hover:text-white">
                   Caucus Newsroom
                 </Link>
               </li>
               <li>
-                <Link
-                  href="https://www.cthousegop.com/communications-contacts/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white"
-                >
+                <Link href="/contact" className="text-white/80 hover:text-white">
                   Media Inquiries
                 </Link>
               </li>
@@ -126,7 +106,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="text-white/80 hover:text-white"
                 >
-                  Bill & Document Search
+                  Bill &amp; Document Search
                 </Link>
               </li>
               <li>

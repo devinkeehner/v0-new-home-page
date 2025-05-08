@@ -49,7 +49,6 @@ const navItems = [
     href: "#",
     children: [
       { name: "Leadership Team", href: "/leadership-team" },
-      { name: "Committee Assignments", href: "/committees" },
       { name: "Caucus Members", href: "/caucus-members" },
       { name: "Find a Legislator", href: "https://www.cga.ct.gov/asp/menu/CGAFindLeg.asp" },
     ],
