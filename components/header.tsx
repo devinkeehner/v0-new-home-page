@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Menu, ChevronDown, ChevronRight, ChevronLeft, Facebook, Instagram, Youtube } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -54,14 +55,7 @@ const navItems = [
       { name: "Find a Legislator", href: "https://www.cga.ct.gov/asp/menu/CGAFindLeg.asp" },
     ],
   },
-  {
-    name: "Newsroom",
-    href: "/newsroom",
-    children: [
-      { name: "Caucus Newsroom", href: "/newsroom" },
-      // Removed "Media Inquiries" as requested
-    ],
-  },
+  { name: "Newsroom", href: "/newsroom" },
   {
     name: "Legislation",
     href: "#",
@@ -448,10 +442,13 @@ export function Header() {
         {/* Top row with logo and menu button */}
         <div className="flex justify-between items-center py-2">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-accent-gold">Connecticut</span>
-              <span className="text-xl font-bold text-accent-gold">House Republicans</span>
-            </div>
+            <Image
+              src="/images/ct-house-gop-logo.jpg"
+              alt="Connecticut House Republicans"
+              width={200}
+              height={50}
+              className="h-14 w-auto"
+            />
           </Link>
 
           {/* Mobile Menu Button */}
@@ -466,18 +463,22 @@ export function Header() {
               <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
                 <div className="py-4">
                   <Link href="/" className="mb-6 flex items-center space-x-2">
-                    <div className="flex flex-col">
-                      <span className="text-lg font-bold text-accent-gold">Connecticut</span>
-                      <span className="text-lg font-bold text-accent-gold">House Republicans</span>
-                    </div>
+                    <Image
+                      src="/images/ct-house-gop-logo.jpg"
+                      alt="Connecticut House Republicans"
+                      width={150}
+                      height={40}
+                      className="h-10 w-auto"
+                    />
                   </Link>
 
                   {/* Signup Form in Mobile Menu - Updated to match slider */}
                   <div className="my-6 p-4 bg-gray-50 rounded-lg">
                     <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
                     <form onSubmit={handleSubmit} className="space-y-3">
+                      {/* Row 1: Email (3/5) and Mobile (2/5) */}
                       <div className="grid grid-cols-5 gap-2">
-                        <div className="col-span-3">
+                        <div className="col-span-3 relative">
                           <input
                             type="email"
                             name="email"
@@ -502,59 +503,6 @@ export function Header() {
                         </div>
                       </div>
 
-                      <div
-                        className={cn(
-                          "grid gap-3 overflow-hidden transition-all duration-500 ease-in-out",
-                          isSignupExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-                        )}
-                      >
-                        <div className="min-h-0 overflow-hidden">
-                          <div className="grid grid-cols-5 gap-2">
-                            <div className="col-span-2">
-                              <input
-                                type="text"
-                                name="firstName"
-                                placeholder="First name"
-                                value={formData.firstName}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                              />
-                            </div>
-                            <div className="col-span-3">
-                              <input
-                                type="text"
-                                name="lastName"
-                                placeholder="Last name"
-                                value={formData.lastName}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-5 gap-2 mt-2">
-                            <div className="col-span-1">
-                              <input
-                                type="text"
-                                name="zipCode"
-                                placeholder="Zip"
-                                value={formData.zipCode}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                              />
-                            </div>
-                            <div className="col-span-4">
-                              <button
-                                type="submit"
-                                className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
-                              >
-                                Sign Up for Updates
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
                       {!isSignupExpanded && (
                         <button
                           type="button"
@@ -564,6 +512,59 @@ export function Header() {
                           Sign Up
                         </button>
                       )}
+
+                      <div
+                        className={cn(
+                          "space-y-3 overflow-hidden transition-all duration-500 ease-in-out",
+                          isSignupExpanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
+                        )}
+                      >
+                        {/* Row 2: First name (2/5) and Last name (3/5) */}
+                        <div className="grid grid-cols-5 gap-2">
+                          <div className="col-span-2">
+                            <input
+                              type="text"
+                              name="firstName"
+                              placeholder="First name"
+                              value={formData.firstName}
+                              onChange={handleInputChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            />
+                          </div>
+                          <div className="col-span-3">
+                            <input
+                              type="text"
+                              name="lastName"
+                              placeholder="Last name"
+                              value={formData.lastName}
+                              onChange={handleInputChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Row 3: Zip code (1/5) and Submit button (4/5) */}
+                        <div className="grid grid-cols-5 gap-2">
+                          <div className="col-span-1">
+                            <input
+                              type="text"
+                              name="zipCode"
+                              placeholder="Zip"
+                              value={formData.zipCode}
+                              onChange={handleInputChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            />
+                          </div>
+                          <div className="col-span-4">
+                            <button
+                              type="submit"
+                              className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
+                            >
+                              Sign Up for Updates
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </form>
                   </div>
 
