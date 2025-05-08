@@ -288,3 +288,53 @@
     margin: 0 0.25rem;
   }
 }
+
+/* Add these hover effect styles at the end of the file */
+
+/* Image hover effects */
+.hover-zoom-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.hover-zoom {
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.hover-zoom-container:hover .hover-zoom {
+  transform: scale(1.05);
+  filter: brightness(1.05);
+}
+
+.hover-highlight {
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-highlight:hover {
+  filter: brightness(1.05) contrast(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Portrait hover effects */
+.portrait-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.portrait-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: var(--secondary);
+}
+
+/* Card image hover effects */
+.card-image-hover {
+  overflow: hidden;
+}
+
+.card-image-hover img {
+  transition: transform 0.4s ease;
+}
+
+.card-image-hover:hover img {
+  transform: scale(1.08);
+}

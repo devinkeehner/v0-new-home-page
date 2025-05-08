@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { CheckCircle } from "lucide-react"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -27,6 +29,11 @@ export default function ContactPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submissionDetails, setSubmissionDetails] = useState({
+    date: "",
+    time: "",
+    reference: "",
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -48,10 +55,23 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
+    // Generate submission details
+    const now = new Date()
+    const date = now.toLocaleDateString()
+    const time = now.toLocaleTimeString()
+    const reference = `REF-${Math.floor(Math.random() * 1000000)
+      .toString()
+      .padStart(6, "0")}`
+
     // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false)
       setSubmitted(true)
+      setSubmissionDetails({
+        date,
+        time,
+        reference,
+      })
       setFormData({
         firstName: "",
         lastName: "",
@@ -65,6 +85,10 @@ export default function ContactPage() {
         message: "",
       })
     }, 1500)
+  }
+
+  const resetForm = () => {
+    setSubmitted(false)
   }
 
   const issues = [
@@ -104,14 +128,40 @@ export default function ContactPage() {
         </p>
 
         {submitted ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-            <h2 className="text-xl font-bold text-green-700 mb-2">Thank You!</h2>
-            <p className="text-green-600">
-              Your message has been submitted successfully. We'll get back to you as soon as possible.
-            </p>
-            <Button className="mt-4" onClick={() => setSubmitted(false)}>
-              Send Another Message
-            </Button>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            <Alert className="border-green-500 bg-transparent">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <AlertTitle className="text-xl font-bold text-green-700">Thank You!</AlertTitle>
+              <AlertDescription className="text-green-600">
+                <p className="mb-4">
+                  Your message has been submitted successfully. We'll get back to you as soon as possible.
+                </p>
+                <div className="bg-white p-4 rounded-md border border-green-100 mb-4">
+                  <h3 className="font-semibold text-gray-700 mb-2">Submission Details:</h3>
+                  <ul className="space-y-1 text-sm">
+                    <li>
+                      <span className="font-medium">Date:</span> {submissionDetails.date}
+                    </li>
+                    <li>
+                      <span className="font-medium">Time:</span> {submissionDetails.time}
+                    </li>
+                    <li>
+                      <span className="font-medium">Reference Number:</span> {submissionDetails.reference}
+                    </li>
+                    <li>
+                      <span className="font-medium">Recipient:</span> {formData.representative}
+                    </li>
+                  </ul>
+                </div>
+                <p className="text-sm">
+                  Please save this reference number for your records. If you need to follow up on your message, please
+                  mention this reference number.
+                </p>
+              </AlertDescription>
+            </Alert>
+            <div className="mt-6 text-center">
+              <Button onClick={resetForm}>Send Another Message</Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">

@@ -123,7 +123,7 @@ export default function FlickrGallery() {
           {photos.map((photo, index) => (
             <div
               key={`${photo.id}-${index}`}
-              className="photo-item cursor-pointer overflow-hidden"
+              className="photo-item cursor-pointer overflow-hidden hover-zoom-container"
               onClick={() => openPhotoModal(photo)}
             >
               {/* Use spinner for loading state */}
@@ -133,7 +133,7 @@ export default function FlickrGallery() {
                   src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
                   data-src={photo.medium || "/placeholder.svg"}
                   alt={photo.title}
-                  className="h-full w-full object-cover transition-transform duration-300 hover:scale-105 opacity-0"
+                  className="h-full w-full object-cover hover-zoom opacity-0"
                   onLoad={(e) => {
                     // Once loaded, hide spinner and show image
                     const target = e.target as HTMLImageElement

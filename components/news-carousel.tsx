@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { formatWordPressDate, stripHtmlTags, getFeaturedImageUrl } from "@/lib/api"
+import Image from "next/image"
 
 // Define the WordPress post type
 interface WordPressPost {
@@ -82,17 +83,19 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
 
     return (
       <Card key={post.id} className="flex h-full flex-col overflow-hidden">
-        <Link href={`/post/${postSlug}`} className="relative h-48 w-full bg-muted transition-opacity hover:opacity-90">
-          {imageUrl && (
-            <div className="h-full w-full overflow-hidden">
-              <img
-                src={imageUrl || "/placeholder.svg"}
-                alt={post.title.rendered}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
+        <Link href={`/post/${postSlug}`} className="relative w-full transition-opacity hover:opacity-90">
+          {/* Replace the existing image container with this: */}
+          <div className="relative w-full pt-[52.5%] card-image-hover">
+            <Image
+              src={imageUrl || "/placeholder.svg"}
+              alt={post.title.rendered}
+              fill
+              className="object-cover transition-all duration-300"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              style={{ objectFit: "cover" }}
+              priority
+            />
+          </div>
         </Link>
         <CardHeader>
           <Link href={`/post/${postSlug}`} className="hover:text-secondary-red transition-colors">

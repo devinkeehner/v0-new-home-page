@@ -24,14 +24,14 @@ const LeaderCard: React.FC<LeaderCardProps> = ({ name, title, imageUrl, profileU
         href={profileUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mb-2 rounded-full overflow-hidden transition-transform hover:scale-105"
+        className="mb-2 rounded-full overflow-hidden transition-transform portrait-hover"
       >
-        <div className={`relative ${size} rounded-full overflow-hidden bg-gray-200`}>
+        <div className={`relative ${size} rounded-full overflow-hidden bg-gray-200 hover-zoom-container`}>
           {imageUrl ? (
             <img
               src={imageUrl || "/placeholder.svg"}
               alt={name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover hover-zoom"
               onError={(e) => {
                 // If the image fails to load, hide it to show the gray background
                 const target = e.target as HTMLImageElement

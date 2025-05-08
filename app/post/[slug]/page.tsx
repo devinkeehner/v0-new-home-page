@@ -75,6 +75,10 @@ export default async function PostPage({ params }: { params: { slug: string } })
   const recentPosts = await getRecentPosts(post.id)
   const featuredImageUrl = getFeaturedImageUrl(post)
 
+  // Calculate aspect ratio for 1200x630 (wider than tall)
+  const aspectRatio = 1200 / 630
+  const heightClass = "pt-[52.5%]" // (630/1200)*100 = 52.5%
+
   return (
     <div className="container py-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -82,12 +86,12 @@ export default async function PostPage({ params }: { params: { slug: string } })
         <div className="lg:col-span-2">
           {/* Featured Image */}
           {featuredImageUrl && (
-            <div className="relative mb-6 h-[400px] w-full overflow-hidden">
+            <div className={`relative mb-6 w-full ${heightClass} overflow-hidden hover-zoom-container`}>
               <Image
                 src={featuredImageUrl || "/placeholder.svg"}
                 alt={post.title.rendered}
                 fill
-                className="object-cover"
+                className="object-cover hover-zoom"
                 priority
               />
             </div>
@@ -143,7 +147,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
                 return (
                   <Card key={recentPost.id} className="overflow-hidden">
                     {recentPostImageUrl && (
-                      <div className="relative h-48 w-full">
+                      <div className="relative w-full pt-[52.5%] card-image-hover">
                         <Image
                           src={recentPostImageUrl || "/placeholder.svg"}
                           alt={recentPost.title.rendered}

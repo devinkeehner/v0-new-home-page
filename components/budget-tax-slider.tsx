@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react"
+import { ChevronLeft, ChevronRight, ExternalLink, CheckCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 // Define the tax relief options for the second slide
 const taxReliefOptions = [
@@ -33,7 +34,7 @@ const taxReliefOptions = [
 const slides = [
   {
     id: "house-republicans",
-    title: "Connecticut House Republicans",
+    title: "Connecticut\nHouse Republicans",
     subtitle: "Fighting for Connecticut's families and businesses with common-sense solutions.",
     bgColor: "bg-primary-navy",
     textColor: "text-white",
@@ -69,6 +70,7 @@ export function BudgetTaxSlider() {
     firstName: "",
     lastName: "",
   })
+  const [formSubmitted, setFormSubmitted] = useState(false)
 
   // Auto-advance slides
   useEffect(() => {
@@ -80,6 +82,12 @@ export function BudgetTaxSlider() {
 
     return () => clearInterval(interval)
   }, [autoplay])
+
+  // Reset form submitted state when changing slides
+  useEffect(() => {
+    setFormSubmitted(false)
+    setIsExpanded(false)
+  }, [currentSlide])
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length)
@@ -104,11 +112,31 @@ export function BudgetTaxSlider() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Show toast notification
     toast({
       title: "Success!",
       description: "Thank you for signing up for updates.",
     })
-    // Reset form
+
+    // Show inline confirmation
+    setFormSubmitted(true)
+
+    // Reset form after a delay
+    setTimeout(() => {
+      setFormData({
+        email: "",
+        mobile: "",
+        zipCode: "",
+        firstName: "",
+        lastName: "",
+      })
+    }, 500)
+  }
+
+  const resetForm = () => {
+    setFormSubmitted(false)
+    setIsExpanded(false)
     setFormData({
       email: "",
       mobile: "",
@@ -116,7 +144,6 @@ export function BudgetTaxSlider() {
       firstName: "",
       lastName: "",
     })
-    setIsExpanded(false)
   }
 
   return (
@@ -132,7 +159,15 @@ export function BudgetTaxSlider() {
               <div className="container mx-auto max-w-6xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h2 className={cn("text-4xl font-bold mb-4 font-sans", slide.textColor)}>{slide.title}</h2>
+                    {index === 0 ? (
+                      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-sans text-[#FFD700] whitespace-pre-line">
+                        Connecticut
+                        <br />
+                        House Republicans
+                      </h2>
+                    ) : (
+                      <h2 className={cn("text-4xl font-bold mb-4 font-sans", slide.textColor)}>{slide.title}</h2>
+                    )}
                     <p
                       className={cn(
                         "text-xl mb-6",
@@ -144,86 +179,142 @@ export function BudgetTaxSlider() {
 
                     {/* First and Third Slide: Email signup form with expansion */}
                     {(index === 0 || index === 2) && (
-                      <form onSubmit={handleSubmit} className="w-full max-w-md">
-                        <div className="space-y-3">
-                          <div className="relative">
-                            <Input
-                              type="email"
-                              name="email"
-                              placeholder="Enter your email"
-                              value={formData.email}
-                              onChange={handleInputChange}
-                              onFocus={handleFocus}
-                              required
-                              className="bg-white pr-6 text-primary-navy"
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-red">*</span>
-                          </div>
+                      <div className="w-full max-w-md">
+                        {formSubmitted ? (
+                          <Alert
+                            className={cn(
+                              "border-green-500 bg-green-50",
+                              index === 0 ? "bg-opacity-90 text-white border-white/30" : "",
+                            )}
+                          >
+                            <CheckCircle className={cn("h-5 w-5 text-green-500", index === 0 ? "text-white" : "")} />
+                            <AlertTitle className={index === 0 ? "text-white" : ""}>
+                              Thank you for signing up!
+                            </AlertTitle>
+                            <AlertDescription className={index === 0 ? "text-white/90" : ""}>
+                              You've been successfully added to our mailing list. We'll keep you updated with the latest
+                              news and information.
+                            </AlertDescription>
+                            <Button
+                              onClick={resetForm}
+                              variant="outline"
+                              className={cn(
+                                "mt-2",
+                                index === 0 ? "border-white/30 text-white hover:bg-white/10 hover:text-white" : "",
+                              )}
+                            >
+                              Sign up another email
+                            </Button>
+                          </Alert>
+                        ) : (
+                          <form onSubmit={handleSubmit} className="space-y-3">
+                            {!isExpanded ? (
+                              <>
+                                <div className="relative">
+                                  <Input
+                                    type="email"
+                                    name="email"
+                                    placeholder="Enter your email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    onFocus={handleFocus}
+                                    required
+                                    className="bg-white pr-6 text-primary-navy"
+                                  />
+                                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-red">
+                                    *
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <Input
+                                    type="tel"
+                                    name="mobile"
+                                    placeholder="Mobile number"
+                                    value={formData.mobile}
+                                    onChange={handleInputChange}
+                                    onFocus={handleFocus}
+                                    className="bg-white text-primary-navy"
+                                  />
+                                  <Button
+                                    type="submit"
+                                    className="bg-secondary-red hover:bg-secondary-red/90"
+                                    onClick={handleFocus}
+                                  >
+                                    Sign Up
+                                  </Button>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                {/* Row 1: Email (3/5) Mobile (2/5) */}
+                                <div className="grid grid-cols-5 gap-3">
+                                  <Input
+                                    type="email"
+                                    name="email"
+                                    placeholder="Enter your email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="col-span-3 bg-white pr-6 text-primary-navy"
+                                  />
+                                  <Input
+                                    type="tel"
+                                    name="mobile"
+                                    placeholder="Mobile number"
+                                    value={formData.mobile}
+                                    onChange={handleInputChange}
+                                    className="col-span-2 bg-white text-primary-navy"
+                                  />
+                                </div>
 
-                          {isExpanded ? (
-                            <>
-                              <div className="grid grid-cols-2 gap-3">
-                                <Input
-                                  type="tel"
-                                  name="mobile"
-                                  placeholder="Mobile number"
-                                  value={formData.mobile}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy"
-                                />
-                                <Input
-                                  type="text"
-                                  name="zipCode"
-                                  placeholder="Zip code"
-                                  value={formData.zipCode}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy"
-                                />
-                              </div>
-                              <div className="grid grid-cols-2 gap-3">
-                                <Input
-                                  type="text"
-                                  name="firstName"
-                                  placeholder="First name"
-                                  value={formData.firstName}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy"
-                                />
-                                <Input
-                                  type="text"
-                                  name="lastName"
-                                  placeholder="Last name"
-                                  value={formData.lastName}
-                                  onChange={handleInputChange}
-                                  className="bg-white text-primary-navy"
-                                />
-                              </div>
-                              <Button type="submit" className="w-full bg-secondary-red hover:bg-secondary-red/90">
-                                Sign Up for Updates
-                              </Button>
-                            </>
-                          ) : (
-                            <div className="grid grid-cols-2 gap-3">
-                              <Input
-                                type="tel"
-                                name="mobile"
-                                placeholder="Mobile number"
-                                value={formData.mobile}
-                                onChange={handleInputChange}
-                                onFocus={handleFocus}
-                                className="bg-white text-primary-navy"
-                              />
-                              <Button
-                                type="submit"
-                                className="bg-secondary-red hover:bg-secondary-red/90"
-                                onClick={handleFocus}
-                              >
-                                Sign Up
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </form>
+                                {/* Row 2: First name (2/5) Last name (3/5) */}
+                                <div className="grid grid-cols-5 gap-3">
+                                  <Input
+                                    type="text"
+                                    name="firstName"
+                                    placeholder="First name"
+                                    value={formData.firstName}
+                                    onChange={handleInputChange}
+                                    className="col-span-2 bg-white text-primary-navy"
+                                  />
+                                  <Input
+                                    type="text"
+                                    name="lastName"
+                                    placeholder="Last name"
+                                    value={formData.lastName}
+                                    onChange={handleInputChange}
+                                    className="col-span-3 bg-white text-primary-navy"
+                                  />
+                                </div>
+
+                                {/* Row 3: Zip code (1/5) Submit button (4/5) */}
+                                <div className="grid grid-cols-5 gap-3">
+                                  <Input
+                                    type="text"
+                                    name="zipCode"
+                                    placeholder="Zip"
+                                    value={formData.zipCode}
+                                    onChange={handleInputChange}
+                                    className="col-span-1 bg-white text-primary-navy"
+                                  />
+                                  <Button
+                                    type="submit"
+                                    className="col-span-4 bg-secondary-red hover:bg-secondary-red/90"
+                                  >
+                                    Sign Up for Updates
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </form>
+                        )}
+
+                        {!formSubmitted && (
+                          <p className="mt-2 text-sm text-white/80">
+                            Stay informed with the latest news and updates from our caucus.
+                          </p>
+                        )}
+                      </div>
                     )}
 
                     {/* Second Slide: Tax Relief Options */}
@@ -259,13 +350,6 @@ export function BudgetTaxSlider() {
                           </Button>
                         </div>
                       </div>
-                    )}
-
-                    {/* First Slide: Additional text */}
-                    {index === 0 && (
-                      <p className="mt-2 text-sm text-white/80">
-                        Stay informed with the latest news and updates from our caucus.
-                      </p>
                     )}
                   </div>
 

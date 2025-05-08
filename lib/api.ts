@@ -184,18 +184,23 @@ export function stripHtmlTags(html: string): string {
   return html.replace(/<\/?[^>]+(>|$)/g, "")
 }
 
-// Simplified function to get the featured image URL directly from the source
+// Updated function to get the featured image URL with aspect ratio control
 export function getFeaturedImageUrl(post: any): string {
-  // Simply get the source_url directly if available
+  // Check if the post has a featured image
   if (
     post._embedded &&
     post._embedded["wp:featuredmedia"] &&
     post._embedded["wp:featuredmedia"][0] &&
     post._embedded["wp:featuredmedia"][0].source_url
   ) {
-    return post._embedded["wp:featuredmedia"][0].source_url
+    const imageUrl = post._embedded["wp:featuredmedia"][0].source_url
+
+    // For WordPress images, we can't directly control the aspect ratio
+    // But we can use the image as is and control the aspect ratio in the component
+    return imageUrl
   }
 
-  // Return a placeholder if no featured image is found
+  // Return a placeholder with the correct aspect ratio if no featured image is found
+  // Using a 630x1200 aspect ratio (which is 0.525)
   return "/news-collage.png"
 }
