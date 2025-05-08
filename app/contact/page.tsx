@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle } from "lucide-react"
+import { getCaucusMembers } from "@/lib/caucus_members_data"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -34,6 +35,26 @@ export default function ContactPage() {
     time: "",
     reference: "",
   })
+  const [representatives, setRepresentatives] = useState<string[]>(["To General Mailbox"])
+
+  useEffect(() => {
+    const loadRepresentatives = async () => {
+      try {
+        // Get caucus members - they are already sorted by last name in the source data
+        const caucusMembers = await getCaucusMembers()
+
+        // Format each name with "Representative" prefix, maintaining the original order
+        const repNames = caucusMembers.map((member) => `Representative ${member.name}`)
+
+        // Add "To General Mailbox" as the first option
+        setRepresentatives(["To General Mailbox", ...repNames])
+      } catch (error) {
+        console.error("Failed to load representatives:", error)
+      }
+    }
+
+    loadRepresentatives()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -100,20 +121,6 @@ export default function ContactPage() {
     "Seniors",
     "Mental Health & Addiction Services",
     "Environment",
-  ]
-
-  const representatives = [
-    "To General Mailbox",
-    "Representative Tim Ackert",
-    "Representative Mark Anderson",
-    "Representative Chris Aniskovich",
-    "Representative Mitch Bolinsky",
-    "Representative Seth Bronko",
-    "Representative Jason Buchsbaum",
-    "Representative Bill Buckbee",
-    "Representative Patrick Callahan",
-    "Representative Vincent Candelora",
-    // Add all representatives here
   ]
 
   return (
@@ -261,10 +268,10 @@ export default function ContactPage() {
                 Is your message for a specific representative?
               </Label>
               <Select value={formData.representative} onValueChange={handleSelectChange}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a representative" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px]">
                   {representatives.map((rep) => (
                     <SelectItem key={rep} value={rep}>
                       {rep}

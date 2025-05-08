@@ -150,6 +150,7 @@ export function Header() {
     firstName: "",
     lastName: "",
   })
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -181,24 +182,20 @@ export function Header() {
     }
   }, [activeDropdowns])
 
-  const toggleDropdown = (path: string) => {
+  const toggleDropdown = (path: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+
     setActiveDropdowns((current) => {
-      // Close any other top-level dropdowns
-      const filtered = current.filter((id) => {
-        // Keep this path and its children
-        if (id === path || id.startsWith(`${path}-`)) return true
-
-        // For other paths, check if this path is a child of any active path
-        const isChildOfActivePath = current.some((activePath) => path.startsWith(`${activePath}-`))
-
-        return isChildOfActivePath
-      })
-
-      // Toggle this dropdown
-      if (filtered.includes(path)) {
-        return filtered.filter((id) => id !== path && !id.startsWith(`${path}-`))
+      // Check if this path is already active
+      if (current.includes(path)) {
+        // If active, remove it and its children
+        return current.filter((id) => id !== path && !id.startsWith(`${path}-`))
       } else {
-        return [...filtered, path]
+        // If not active, add it
+        return [...current, path]
       }
     })
   }
@@ -403,34 +400,83 @@ export function Header() {
     const currentPath = path ? `${path}-${item.name}` : item.name
     const isActive = isDropdownActive(currentPath)
 
+    if (!hasChildren) {
+      return (
+        <Link
+          key={currentPath}
+          href={item.href}
+          className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
+          onClick={() => setMobileMenuOpen(false)}
+          target={item.href.startsWith("http") ? "_blank" : undefined}
+          rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+        >
+          {item.name}
+        </Link>
+      )
+    }
+
     return (
       <div key={currentPath} className={cn(depth > 0 ? "ml-4" : "")}>
-        {!hasChildren ? (
-          <Link
-            href={item.href}
-            className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-            onClick={() => setActiveDropdowns([])}
-            target={item.href.startsWith("http") ? "_blank" : undefined}
-            rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-          >
-            {item.name}
-          </Link>
-        ) : (
-          <>
-            <button
-              className="flex w-full items-center justify-between rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
-              onClick={() => toggleDropdown(currentPath)}
-            >
-              {item.name}
-              <ChevronDown className={cn("h-4 w-4 transition-transform", isActive ? "rotate-180" : "")} />
-            </button>
+        <button
+          className="flex w-full items-center justify-between rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
+          onClick={(e) => toggleDropdown(currentPath, e)}
+        >
+          {item.name}
+          <ChevronDown className={cn("h-4 w-4 transition-transform", isActive ? "rotate-180" : "")} />
+        </button>
 
-            {isActive && (
-              <div className="mt-1 space-y-1">
-                {item.children.map((child: any) => renderMobileNavItem(child, depth + 1, currentPath))}
-              </div>
-            )}
-          </>
+        {isActive && (
+          <div className="mt-1 space-y-1 pl-4">
+            {item.children.map((child: any) => {
+              const childHasChildren = child.children && child.children.length > 0
+              const childPath = `${currentPath}-${child.name}`
+              const isChildActive = isDropdownActive(childPath)
+
+              if (!childHasChildren) {
+                return (
+                  <Link
+                    key={childPath}
+                    href={child.href}
+                    className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
+                    onClick={() => setMobileMenuOpen(false)}
+                    target={child.href.startsWith("http") ? "_blank" : undefined}
+                    rel={child.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  >
+                    {child.name}
+                  </Link>
+                )
+              }
+
+              return (
+                <div key={childPath}>
+                  <button
+                    className="flex w-full items-center justify-between rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
+                    onClick={(e) => toggleDropdown(childPath, e)}
+                  >
+                    {child.name}
+                    <ChevronDown className={cn("h-4 w-4 transition-transform", isChildActive ? "rotate-180" : "")} />
+                  </button>
+
+                  {isChildActive && (
+                    <div className="mt-1 space-y-1 pl-4">
+                      {child.children.map((grandchild: any) => (
+                        <Link
+                          key={`${childPath}-${grandchild.name}`}
+                          href={grandchild.href}
+                          className="block rounded-md px-3 py-2 text-base font-medium text-primary-navy hover:bg-muted"
+                          onClick={() => setMobileMenuOpen(false)}
+                          target={grandchild.href.startsWith("http") ? "_blank" : undefined}
+                          rel={grandchild.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        >
+                          {grandchild.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         )}
       </div>
     )
@@ -453,7 +499,7 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Sheet>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost">
                   <span className="sr-only">Open main menu</span>
@@ -462,7 +508,7 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
                 <div className="py-4">
-                  <Link href="/" className="mb-6 flex items-center space-x-2">
+                  <Link href="/" className="mb-6 flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
                     <Image
                       src="/images/ct-house-gop-logo.jpg"
                       alt="Connecticut House Republicans"

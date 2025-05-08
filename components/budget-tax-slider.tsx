@@ -150,6 +150,48 @@ export function BudgetTaxSlider() {
     <div className="relative">
       {/* Slider */}
       <div className="relative overflow-hidden">
+        {/* Mobile Navigation Arrows - Top Position */}
+        <div className="md:hidden flex justify-between items-center px-4 py-2 bg-white/10 backdrop-blur-sm z-20">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={prevSlide}
+            className="rounded-full bg-white/80 backdrop-blur-sm shadow-md"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+
+          <div className="flex space-x-2">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setCurrentSlide(index)
+                  setAutoplay(false)
+                }}
+                className={cn(
+                  "h-2 w-6 rounded-full transition-colors",
+                  currentSlide === index
+                    ? index === 1
+                      ? "bg-primary-navy"
+                      : "bg-secondary-red"
+                    : "bg-gray-300 hover:bg-gray-400",
+                )}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={nextSlide}
+            className="rounded-full bg-white/80 backdrop-blur-sm shadow-md"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
+
         {slides.map((slide, index) => (
           <div
             key={slide.id}
@@ -160,7 +202,7 @@ export function BudgetTaxSlider() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                   <div>
                     {index === 0 ? (
-                      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-sans text-[#FFD700] whitespace-pre-line">
+                      <h2 className="text-4xl md:text-4xl lg:text-5xl font-bold mb-4 font-sans text-[#FFD700] whitespace-pre-line">
                         Connecticut
                         <br />
                         House Republicans
@@ -404,8 +446,8 @@ export function BudgetTaxSlider() {
         ))}
       </div>
 
-      {/* Navigation Arrows */}
-      <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2 flex justify-between z-20 pointer-events-none">
+      {/* Desktop Navigation Arrows */}
+      <div className="hidden md:flex absolute top-1/2 left-4 right-4 -translate-y-1/2 justify-between z-20 pointer-events-none">
         <Button
           variant="outline"
           size="icon"
@@ -424,8 +466,8 @@ export function BudgetTaxSlider() {
         </Button>
       </div>
 
-      {/* Slide Indicators */}
-      <div className="flex justify-center py-4">
+      {/* Desktop Slide Indicators */}
+      <div className="hidden md:flex justify-center py-4">
         {slides.map((_, index) => (
           <button
             key={index}

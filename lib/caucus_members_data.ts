@@ -295,3 +295,7 @@ export const caucusMembers = [
     contactUrl: "https://www.cthousegop.com/Zupkus/contact",
   },
 ]
+
+export async function getCaucusMembers() {
+  return caucusMembers
+}
