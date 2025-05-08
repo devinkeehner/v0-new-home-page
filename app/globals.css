@@ -252,50 +252,40 @@
   max-height: 500px; /* Adjust as needed */
 }
 
-/* Social icons */
-.social-icons {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.social-icons a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.2s ease;
-}
-
-.social-icons a:hover {
-  opacity: 0.8;
-}
-
-.social-icons img {
-  width: 32px;
-  height: 32px;
-}
-
-@media (max-width: 767px) {
-  .social-icons {
-    gap: 0;
-    padding: 8px 0;
-  }
-
-  .social-icons img {
-    width: 36px;
-    height: 36px;
-  }
-}
-
-@media (min-width: 768px) {
-  .social-icons {
-    gap: 1rem;
-  }
-}
-
 /* Add responsive header height */
 @media (max-width: 767px) {
   .header-container {
-    min-height: 100px; /* Increased height for mobile to accommodate social icons row */
+    min-height: 80px;
+  }
+}
+
+/* Social icons styling */
+.social-icons-container {
+  display: flex;
+  align-items: center;
+}
+
+.social-icons-container a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.social-icons-container a:hover {
+  transform: translateY(-2px);
+}
+
+/* Mobile social icons specific styling */
+@media (max-width: 767px) {
+  .social-icons-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .social-icons-mobile a {
+    padding: 0.25rem;
   }
 }

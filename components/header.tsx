@@ -3,10 +3,41 @@
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react"
+import { Menu, ChevronDown, ChevronRight, ChevronLeft, Facebook, Instagram, Youtube } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { XIcon } from "./icons/x-icon"
+import { FlickrIcon } from "./icons/flickr-icon"
+
+// Social media links
+const socialLinks = [
+  {
+    name: "Facebook",
+    href: "https://www.facebook.com/pages/Connecticut-House-Republicans/117202885876",
+    icon: Facebook,
+  },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/user/CTHouseRepublicans",
+    icon: Youtube,
+  },
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/cthousegop/",
+    icon: Instagram,
+  },
+  {
+    name: "X",
+    href: "https://x.com/cthousegop",
+    icon: XIcon,
+  },
+  {
+    name: "Flickr",
+    href: "https://www.flickr.com/photos/cthouserepublicans/",
+    icon: FlickrIcon,
+  },
+]
 
 // Restructured navigation items based on the new requirements
 const navItems = [
@@ -108,35 +139,6 @@ const navItems = [
         ],
       },
     ],
-  },
-]
-
-// Social media links
-const socialLinks = [
-  {
-    name: "Facebook",
-    href: "https://www.facebook.com/pages/Connecticut-House-Republicans/117202885876",
-    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/facebook.png",
-  },
-  {
-    name: "YouTube",
-    href: "https://www.youtube.com/user/CTHouseRepublicans",
-    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/youtube.png",
-  },
-  {
-    name: "Instagram",
-    href: "https://www.instagram.com/cthousegop/",
-    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/instagram.png",
-  },
-  {
-    name: "X",
-    href: "https://x.com/cthousegop",
-    icon: "http://www.cthousegop.com/wp-content/uploads/2023/12/logo-black.png",
-  },
-  {
-    name: "Flickr",
-    href: "https://www.flickr.com/photos/cthouserepublicans/",
-    icon: "https://www.cthousegop.com/klarides/wp-content/plugins/social-media-feather/synved-social/image/social/regular/48x48/flickr.png",
   },
 ]
 
@@ -404,21 +406,53 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div className="container flex flex-col h-24">
         {/* Top row with logo and social icons */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center py-2">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <Image
-                src="/images/ct-house-gop-logo.jpg"
-                alt="Connecticut House Republicans"
-                width={200}
-                height={50}
-                className="h-14 w-auto"
-              />
-            </Link>
+        <div className="flex justify-between items-center py-2">
+          <Link href="/" className="flex items-center space-x-2">
+            <Image
+              src="/images/ct-house-gop-logo.jpg"
+              alt="Connecticut House Republicans"
+              width={200}
+              height={50}
+              className="h-14 w-auto"
+            />
+          </Link>
 
-            {/* Mobile Menu Button */}
+          {/* Social Icons - Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            {socialLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-navy hover:text-secondary-red transition-colors"
+                aria-label={link.name}
+              >
+                <link.icon className="h-5 w-5" />
+              </Link>
+            ))}
+          </div>
+
+          {/* Mobile Menu Button and Social Icons */}
+          <div className="flex items-center md:hidden">
+            {/* Social Icons - Mobile (horizontal row) */}
+            <div className="flex items-center mr-2">
+              {socialLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-navy hover:text-secondary-red transition-colors p-1"
+                  aria-label={link.name}
+                >
+                  <link.icon className="h-4 w-4" />
+                </Link>
+              ))}
+            </div>
+
             <Sheet>
-              <SheetTrigger asChild className="md:hidden">
+              <SheetTrigger asChild>
                 <Button variant="ghost">
                   <span className="sr-only">Open main menu</span>
                   <Menu className="h-6 w-6" aria-hidden="true" />
@@ -435,27 +469,6 @@ export function Header() {
                       className="h-10 w-auto"
                     />
                   </Link>
-
-                  {/* Social Icons - Mobile Sheet */}
-                  <div className="flex social-icons justify-between w-full px-2 my-4">
-                    {socialLinks.map((link) => (
-                      <a
-                        key={link.name}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={link.name}
-                      >
-                        <img
-                          src={link.icon || "/placeholder.svg"}
-                          alt={link.name}
-                          width={32}
-                          height={32}
-                          loading="lazy"
-                        />
-                      </a>
-                    ))}
-                  </div>
 
                   {/* Signup Form in Mobile Menu */}
                   <div className="my-6 p-4 bg-gray-50 rounded-lg">
@@ -496,24 +509,6 @@ export function Header() {
                 </div>
               </SheetContent>
             </Sheet>
-          </div>
-
-          {/* Social Icons - Mobile (below logo) */}
-          <div className="md:hidden flex social-icons justify-between w-full mt-2 px-2">
-            {socialLinks.map((link) => (
-              <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.name}>
-                <img src={link.icon || "/placeholder.svg"} alt={link.name} width={32} height={32} loading="lazy" />
-              </a>
-            ))}
-          </div>
-
-          {/* Social Icons - Desktop Only */}
-          <div className="hidden md:flex social-icons">
-            {socialLinks.map((link) => (
-              <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.name}>
-                <img src={link.icon || "/placeholder.svg"} alt={link.name} width={32} height={32} loading="lazy" />
-              </a>
-            ))}
           </div>
         </div>
 
