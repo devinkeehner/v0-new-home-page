@@ -1,6 +1,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Facebook, Instagram, Youtube } from "lucide-react"
+import { XIcon } from "./icons/x-icon"
+import { FlickrIcon } from "./icons/flickr-icon"
 
 export function Footer() {
   return (
@@ -38,21 +40,7 @@ export function Footer() {
                 className="text-white hover:text-accent-gold"
               >
                 <span className="sr-only">X</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6"
-                >
-                  <path d="M18 6L6 18" />
-                  <path d="M6 6L18 18" />
-                </svg>
+                <XIcon className="h-6 w-6" />
               </Link>
               <Link
                 href="https://www.instagram.com/cthousegop/"
@@ -79,21 +67,7 @@ export function Footer() {
                 className="text-white hover:text-accent-gold"
               >
                 <span className="sr-only">Flickr</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6"
-                >
-                  <circle cx="8" cy="12" r="3" />
-                  <circle cx="16" cy="12" r="3" />
-                </svg>
+                <FlickrIcon className="h-6 w-6" />
               </Link>
             </div>
           </div>
@@ -152,7 +126,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="text-white/80 hover:text-white"
                 >
-                  Bill &amp; Document Search
+                  Bill & Document Search
                 </Link>
               </li>
               <li>

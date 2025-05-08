@@ -5,17 +5,69 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search } from "lucide-react"
 import { formatWordPressDate, stripHtmlTags, getFeaturedImageUrl } from "@/lib/api"
 
 export default function NewsroomPage() {
   const [posts, setPosts] = useState<any[]>([])
+  const [allPosts, setAllPosts] = useState<any[]>([]) // Store all posts for search
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const postsPerPage = 9
 
+  // Fetch all posts for search functionality
+  useEffect(() => {
+    async function fetchAllPosts() {
+      try {
+        const response = await fetch(
+          `https://www.cthousegop.com/wp-json/wp/v2/posts?status=publish&per_page=100&_embed`,
+          {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            cache: "no-store",
+          },
+        )
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch all posts: ${response.status}`)
+        }
+
+        const responseText = await response.text()
+        let fetchedPosts
+
+        try {
+          fetchedPosts = JSON.parse(responseText)
+        } catch (parseError) {
+          console.error("Error parsing WordPress response:", parseError)
+          const jsonStartIndex = responseText.indexOf("[")
+          if (jsonStartIndex >= 0) {
+            const jsonText = responseText.substring(jsonStartIndex)
+            fetchedPosts = JSON.parse(jsonText)
+          } else {
+            const objectStartIndex = responseText.indexOf("{")
+            if (objectStartIndex >= 0) {
+              const jsonText = responseText.substring(objectStartIndex)
+              fetchedPosts = JSON.parse(jsonText)
+            } else {
+              throw new Error("Could not extract JSON from response")
+            }
+          }
+        }
+
+        setAllPosts(fetchedPosts)
+      } catch (error) {
+        console.error("Error fetching all posts:", error)
+      }
+    }
+
+    fetchAllPosts()
+  }, [])
+
+  // Fetch paginated posts for display
   useEffect(() => {
     async function fetchPosts() {
       try {
@@ -83,11 +135,13 @@ export default function NewsroomPage() {
   }, [currentPage]) // Re-fetch when page changes
 
   // Filter posts based on search term
-  const filteredPosts = posts.filter(
-    (post) =>
-      post.title.rendered.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stripHtmlTags(post.excerpt.rendered).toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filteredPosts = searchTerm
+    ? allPosts.filter(
+        (post) =>
+          post.title.rendered.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          stripHtmlTags(post.excerpt.rendered).toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : posts
 
   // Handle search
   const handleSearch = (term: string) => {
@@ -155,13 +209,14 @@ export default function NewsroomPage() {
       <h1 className="text-3xl font-bold text-center text-primary-navy mb-4">Newsroom</h1>
       <Separator className="mb-8" />
 
-      <div className="max-w-md mx-auto mb-8">
+      <div className="max-w-md mx-auto mb-8 relative">
         <Input
           placeholder="Search news articles..."
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
-          className="mb-2"
+          className="pr-10"
         />
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
       </div>
 
       {loading ? (

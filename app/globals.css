@@ -255,7 +255,7 @@
 /* Add responsive header height */
 @media (max-width: 767px) {
   .header-container {
-    min-height: 80px;
+    min-height: 100px; /* Increased to accommodate social icons row */
   }
 }
 
@@ -278,14 +278,13 @@
 
 /* Mobile social icons specific styling */
 @media (max-width: 767px) {
-  .social-icons-mobile {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
+  .social-icons-container {
+    padding: 0.5rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
   }
 
-  .social-icons-mobile a {
-    padding: 0.25rem;
+  .social-icons-container a {
+    padding: 0.5rem;
+    margin: 0 0.25rem;
   }
 }

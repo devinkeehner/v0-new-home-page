@@ -1,14 +1,16 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Menu, ChevronDown, ChevronRight, ChevronLeft, Facebook, Instagram, Youtube } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { XIcon } from "./icons/x-icon"
 import { FlickrIcon } from "./icons/flickr-icon"
+import { toast } from "@/components/ui/use-toast"
 
 // Social media links
 const socialLinks = [
@@ -57,7 +59,7 @@ const navItems = [
     href: "/newsroom",
     children: [
       { name: "Caucus Newsroom", href: "/newsroom" },
-      { name: "Media Inquiries", href: "/contact" },
+      // Removed "Media Inquiries" as requested
     ],
   },
   {
@@ -84,7 +86,7 @@ const navItems = [
           { name: "Leadership Team", href: "/leadership-team" },
           { name: "House Republicans", href: "/" },
           { name: "Caucus Newsroom", href: "/newsroom" },
-          { name: "Media Inquiries", href: "/contact" },
+          { name: "Media Inquiries", href: "/contact" }, // Kept in Resources submenu
         ],
       },
       {
@@ -146,6 +148,14 @@ export function Header() {
   const [activeDropdowns, setActiveDropdowns] = useState<string[]>([])
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({})
+  const [isSignupExpanded, setIsSignupExpanded] = useState(false)
+  const [formData, setFormData] = useState({
+    email: "",
+    mobile: "",
+    zipCode: "",
+    firstName: "",
+    lastName: "",
+  })
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -249,6 +259,36 @@ export function Header() {
   // Determine if a menu should open to the left instead of right
   const shouldOpenLeft = (itemName: string) => {
     return itemName === "Resources"
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleFocus = () => {
+    if (!isSignupExpanded) {
+      setIsSignupExpanded(true)
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Here you would typically send the data to your newsletter service
+    toast({
+      title: "Success!",
+      description: "You've been signed up for our newsletter.",
+    })
+
+    // Reset form
+    setFormData({
+      email: "",
+      mobile: "",
+      zipCode: "",
+      firstName: "",
+      lastName: "",
+    })
+    setIsSignupExpanded(false)
   }
 
   const renderDesktopNavItem = (item: any, path = "") => {
@@ -404,18 +444,134 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white">
-      <div className="container flex flex-col h-24">
-        {/* Top row with logo and social icons */}
+      <div className="container flex flex-col h-auto md:h-24">
+        {/* Top row with logo and menu button */}
         <div className="flex justify-between items-center py-2">
           <Link href="/" className="flex items-center space-x-2">
-            <Image
-              src="/images/ct-house-gop-logo.jpg"
-              alt="Connecticut House Republicans"
-              width={200}
-              height={50}
-              className="h-14 w-auto"
-            />
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-accent-gold">Connecticut</span>
+              <span className="text-xl font-bold text-accent-gold">House Republicans</span>
+            </div>
           </Link>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost">
+                  <span className="sr-only">Open main menu</span>
+                  <Menu className="h-6 w-6" aria-hidden="true" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+                <div className="py-4">
+                  <Link href="/" className="mb-6 flex items-center space-x-2">
+                    <div className="flex flex-col">
+                      <span className="text-lg font-bold text-accent-gold">Connecticut</span>
+                      <span className="text-lg font-bold text-accent-gold">House Republicans</span>
+                    </div>
+                  </Link>
+
+                  {/* Signup Form in Mobile Menu - Updated to match slider */}
+                  <div className="my-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                      <div className="grid grid-cols-5 gap-2">
+                        <div className="col-span-3">
+                          <input
+                            type="email"
+                            name="email"
+                            placeholder="Email address"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            onFocus={handleFocus}
+                            required
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <input
+                            type="tel"
+                            name="mobile"
+                            placeholder="Mobile number"
+                            value={formData.mobile}
+                            onChange={handleInputChange}
+                            onFocus={handleFocus}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                      </div>
+
+                      <div
+                        className={cn(
+                          "grid gap-3 overflow-hidden transition-all duration-500 ease-in-out",
+                          isSignupExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                        )}
+                      >
+                        <div className="min-h-0 overflow-hidden">
+                          <div className="grid grid-cols-5 gap-2">
+                            <div className="col-span-2">
+                              <input
+                                type="text"
+                                name="firstName"
+                                placeholder="First name"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                            </div>
+                            <div className="col-span-3">
+                              <input
+                                type="text"
+                                name="lastName"
+                                placeholder="Last name"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-5 gap-2 mt-2">
+                            <div className="col-span-1">
+                              <input
+                                type="text"
+                                name="zipCode"
+                                placeholder="Zip"
+                                value={formData.zipCode}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                            </div>
+                            <div className="col-span-4">
+                              <button
+                                type="submit"
+                                className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
+                              >
+                                Sign Up for Updates
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {!isSignupExpanded && (
+                        <button
+                          type="button"
+                          className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
+                          onClick={handleFocus}
+                        >
+                          Sign Up
+                        </button>
+                      )}
+                    </form>
+                  </div>
+
+                  <div className="mt-6 space-y-1">{navItems.map((item) => renderMobileNavItem(item))}</div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
 
           {/* Social Icons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
@@ -432,83 +588,22 @@ export function Header() {
               </Link>
             ))}
           </div>
-
-          {/* Mobile Menu Button and Social Icons */}
-          <div className="flex items-center md:hidden">
-            {/* Social Icons - Mobile (horizontal row) */}
-            <div className="flex items-center mr-2">
-              {socialLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-navy hover:text-secondary-red transition-colors p-1"
-                  aria-label={link.name}
-                >
-                  <link.icon className="h-4 w-4" />
-                </Link>
-              ))}
-            </div>
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost">
-                  <span className="sr-only">Open main menu</span>
-                  <Menu className="h-6 w-6" aria-hidden="true" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
-                <div className="py-4">
-                  <Link href="/" className="mb-6 flex items-center space-x-2">
-                    <Image
-                      src="/images/ct-house-gop-logo.jpg"
-                      alt="Connecticut House Republicans"
-                      width={150}
-                      height={40}
-                      className="h-10 w-auto"
-                    />
-                  </Link>
-
-                  {/* Signup Form in Mobile Menu */}
-                  <div className="my-6 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="text-lg font-bold text-primary-navy mb-3">Stay Updated</h3>
-                    <form
-                      className="space-y-3"
-                      onSubmit={(e) => {
-                        e.preventDefault()
-                        alert("Thank you for signing up!")
-                        // Reset form
-                        const form = e.target as HTMLFormElement
-                        form.reset()
-                      }}
-                    >
-                      <input
-                        type="email"
-                        placeholder="Email address"
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      />
-                      <div className="grid grid-cols-1 gap-2">
-                        <input
-                          type="tel"
-                          placeholder="Mobile number"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full bg-secondary-red text-white py-2 px-4 rounded-md hover:bg-secondary-red/90"
-                      >
-                        Sign Up
-                      </button>
-                    </form>
-                  </div>
-
-                  <div className="mt-6 space-y-1">{navItems.map((item) => renderMobileNavItem(item))}</div>
-                </div>
-              </SheetContent>
-            </Sheet>
+        </div>
+        {/* Social Icons Row - Mobile Only */}
+        <div className="md:hidden flex justify-center py-2 border-t border-gray-100">
+          <div className="flex items-center justify-center space-x-5">
+            {socialLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-navy hover:text-secondary-red transition-colors"
+                aria-label={link.name}
+              >
+                <link.icon className="h-6 w-6" />
+              </Link>
+            ))}
           </div>
         </div>
 
