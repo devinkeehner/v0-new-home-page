@@ -1,78 +1,154 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-
-interface NewsArticle {
-  id: number
-  title: string
-  excerpt: string
-  date: string
-  imageUrl: string
-  url: string
-}
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { formatWordPressDate, stripHtmlTags, getFeaturedImageUrl } from "@/lib/api"
 
 export default function NewsroomPage() {
+  const [posts, setPosts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const postsPerPage = 9
 
-  const newsArticles: NewsArticle[] = [
-    {
-      id: 1,
-      title:
-        'CT House Republicans Unveil "Reality Check Budget" Focused on Affordability, Fiscal Discipline, and Protecting Connecticut\'s Future',
-      excerpt:
-        "HARTFORD — House Republicans on Thursday released their \"Reality Check Budget\" — a responsible, common-sense plan that directly addresses the fiscal challenges within household budgets and state government. In contrast to legislative Democrats' unchecked spending, the Reality Check Budget honors the fiscal guardrails and protects Connecticut's long-term fiscal health while reducing the size and cost of…",
-      date: "May 1, 2025",
-      imageUrl: "/placeholder.svg?height=300&width=500&query=Connecticut state capitol building",
-      url: "https://www.cthousegop.com/ct-house-republicans-unveil-reality-check-budget-focused-on-affordability-fiscal-discipline-and-protecting-connecticuts-future/",
-    },
-    {
-      id: 2,
-      title: "House & Senate GOP Leaders Call for AG Tong to Investigate Possible Civil Rights Violations",
-      excerpt:
-        'HARTFORD—House Republican Leader Vincent Candelora and Senate Republican Leader Stephen Harding on Thursday urged Attorney General William Tong to investigate possible civil rights violations at Yale University, where pro-Palestinian protesters allegedly blocked Jewish students from accessing Beinecke Plaza and directed insults at them. "Attorney General Tong has repeatedly positioned himself as a champion of civil…',
-      date: "April 25, 2025",
-      imageUrl: "/placeholder.svg?height=300&width=500&query=Connecticut state flag",
-      url: "https://www.cthousegop.com/house-senate-gop-leaders-call-for-ag-tong-to-investigate-possible-civil-rights-violations/",
-    },
-    {
-      id: 3,
-      title: "CT Republicans Call Out Ethical Lapses in State Government, Push for Stronger Accountability Measures",
-      excerpt:
-        "HARTFORD — Today, Connecticut House and Senate Republicans criticized the Lamont administration and legislative Democrats for fostering a culture of ethical lapses in state government, pointing to a troubling pattern of scandals and mismanagement. Citing controversies ranging from excessive spending in higher education to a canceled audit and misuse of government resources, Republicans called for an…",
-      date: "March 27, 2025",
-      imageUrl: "/placeholder.svg?height=300&width=500&query=Connecticut state government building",
-      url: "https://www.cthousegop.com/corruptct/",
-    },
-    {
-      id: 4,
-      title: "PODCAST Capitol Rundown: CT House GOP Episode #3",
-      excerpt:
-        "Listen to our latest podcast which provides an inside look at our state government from the prospective of the CT House GOP. This week we delve in to the issue of public safety on our roads with State Rep. Greg Howard",
-      date: "February 15, 2025",
-      imageUrl: "/placeholder.svg?height=300&width=500&query=podcast microphone",
-      url: "https://www.cthousegop.com/podcast-capitol-rundown-ct-house-gop-episode-3/",
-    },
-    {
-      id: 5,
-      title: "Testify to Remove the Public Benefits Charge from Your Electric Bill",
-      excerpt:
-        "Register To Testify*Registration deadline is 3:00 p.m. on Wednesday, March 5th. Submit Written Testimony Hearing Alert: Testify to Lower Your Energy Costs On Thursday, March 6th, you're invited to speak up about the high cost of energy. Earlier this year, House Republicans proposed a six-point plan aimed at reducing your utility bills, both now and…",
-      date: "February 28, 2025",
-      imageUrl: "/placeholder.svg?height=300&width=500&query=electric bill",
-      url: "https://www.cthousegop.com/testify-to-remove-the-public-benefits-charge-from-your-electric-bill/",
-    },
-    // Add more news articles here
-  ]
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        setLoading(true)
 
-  const filteredArticles = newsArticles.filter(
-    (article) =>
-      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchTerm.toLowerCase()),
+        // Fetch posts directly from WordPress API with pagination
+        const response = await fetch(
+          `https://www.cthousegop.com/wp-json/wp/v2/posts?status=publish&per_page=${postsPerPage}&page=${currentPage}&orderby=date&order=desc&_embed`,
+          {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            cache: "no-store",
+          },
+        )
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch posts: ${response.status}`)
+        }
+
+        // Get total pages from headers
+        const wpTotalPages = Number.parseInt(response.headers.get("X-WP-TotalPages") || "1", 10)
+        setTotalPages(wpTotalPages)
+
+        // Parse the response
+        const responseText = await response.text()
+        let fetchedPosts
+
+        try {
+          // Try to parse as JSON
+          fetchedPosts = JSON.parse(responseText)
+        } catch (parseError) {
+          console.error("Error parsing WordPress response:", parseError)
+          // Try to extract JSON from mixed response
+          try {
+            const jsonStartIndex = responseText.indexOf("[")
+            if (jsonStartIndex >= 0) {
+              const jsonText = responseText.substring(jsonStartIndex)
+              fetchedPosts = JSON.parse(jsonText)
+            } else {
+              const objectStartIndex = responseText.indexOf("{")
+              if (objectStartIndex >= 0) {
+                const jsonText = responseText.substring(objectStartIndex)
+                fetchedPosts = JSON.parse(jsonText)
+              } else {
+                throw new Error("Could not extract JSON from response")
+              }
+            }
+          } catch (extractError) {
+            console.error("Failed to extract JSON:", extractError)
+            fetchedPosts = []
+          }
+        }
+
+        setPosts(fetchedPosts)
+      } catch (error) {
+        console.error("Error fetching posts:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [currentPage]) // Re-fetch when page changes
+
+  // Filter posts based on search term
+  const filteredPosts = posts.filter(
+    (post) =>
+      post.title.rendered.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stripHtmlTags(post.excerpt.rendered).toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  // Handle search
+  const handleSearch = (term: string) => {
+    setSearchTerm(term)
+    setCurrentPage(1) // Reset to first page on search
+  }
+
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1))
+
+  // Generate page numbers with ellipsis for large page counts
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxVisiblePages = 5
+
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total is less than max visible
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      // Always show first page
+      pageNumbers.push(1)
+
+      // Calculate start and end of visible pages
+      let start = Math.max(2, currentPage - 1)
+      let end = Math.min(totalPages - 1, currentPage + 1)
+
+      // Adjust if at the beginning
+      if (currentPage <= 3) {
+        end = Math.min(totalPages - 1, maxVisiblePages - 1)
+      }
+
+      // Adjust if at the end
+      if (currentPage >= totalPages - 2) {
+        start = Math.max(2, totalPages - maxVisiblePages + 2)
+      }
+
+      // Add ellipsis before middle pages if needed
+      if (start > 2) {
+        pageNumbers.push("...")
+      }
+
+      // Add middle pages
+      for (let i = start; i <= end; i++) {
+        pageNumbers.push(i)
+      }
+
+      // Add ellipsis after middle pages if needed
+      if (end < totalPages - 1) {
+        pageNumbers.push("...")
+      }
+
+      // Always show last page
+      pageNumbers.push(totalPages)
+    }
+
+    return pageNumbers
+  }
 
   return (
     <div className="container py-10">
@@ -83,69 +159,129 @@ export default function NewsroomPage() {
         <Input
           placeholder="Search news articles..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
           className="mb-2"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredArticles.length > 0 ? (
-          filteredArticles.map((article) => <NewsCard key={article.id} article={article} />)
-        ) : (
-          <div className="col-span-full text-center py-10">
-            <p className="text-lg text-gray-500">No news articles found matching your search.</p>
-          </div>
-        )}
-      </div>
-
-      {filteredArticles.length > 0 && filteredArticles.length < newsArticles.length && (
-        <div className="text-center mt-8">
-          <Button variant="outline" onClick={() => setSearchTerm("")}>
-            Clear Search
-          </Button>
+      {loading ? (
+        <div className="text-center py-20">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-lg">Loading articles...</p>
         </div>
+      ) : (
+        <>
+          {searchTerm ? (
+            // When searching, show filtered posts
+            filteredPosts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPosts.map((post) => (
+                  <NewsCard key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-lg text-gray-500">No news articles found matching your search.</p>
+                <Button variant="outline" onClick={() => setSearchTerm("")} className="mt-4">
+                  Clear Search
+                </Button>
+              </div>
+            )
+          ) : // When not searching, show current page of posts
+          posts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <NewsCard key={post.id} post={post} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-lg text-gray-500">No news articles available.</p>
+            </div>
+          )}
+
+          {/* Pagination - only show when not searching */}
+          {!searchTerm && totalPages > 1 && (
+            <div className="flex justify-center items-center mt-10 gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={prevPage}
+                disabled={currentPage === 1}
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex gap-1">
+                {getPageNumbers().map((number, index) =>
+                  typeof number === "number" ? (
+                    <Button
+                      key={index}
+                      variant={currentPage === number ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => paginate(number)}
+                      className={currentPage === number ? "bg-secondary-red hover:bg-secondary-red/90" : ""}
+                    >
+                      {number}
+                    </Button>
+                  ) : (
+                    <span key={index} className="px-2 flex items-center">
+                      {number}
+                    </span>
+                  ),
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+                aria-label="Next page"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
 }
 
 interface NewsCardProps {
-  article: NewsArticle
+  post: any
 }
 
-function NewsCard({ article }: NewsCardProps) {
+function NewsCard({ post }: NewsCardProps) {
+  const imageUrl = getFeaturedImageUrl(post)
+  const postSlug = post.slug || `${post.id}`
+
   return (
     <Card className="h-full flex flex-col">
-      <a href={article.url} target="_blank" rel="noopener noreferrer" className="block h-48 overflow-hidden">
+      <a href={`/post/${postSlug}`} className="block h-48 overflow-hidden">
         <img
-          src={article.imageUrl || "/placeholder.svg"}
-          alt={article.title}
+          src={imageUrl || "/placeholder.svg"}
+          alt={stripHtmlTags(post.title.rendered)}
           className="w-full h-full object-cover transition-transform hover:scale-105"
         />
       </a>
       <CardHeader>
         <CardTitle className="text-lg">
           <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`/post/${postSlug}`}
             className="hover:text-secondary-red transition-colors"
-          >
-            {article.title}
-          </a>
+            dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+          />
         </CardTitle>
-        <CardDescription>{article.date}</CardDescription>
+        <CardDescription>{formatWordPressDate(post.date)}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
-        <p className="text-sm text-gray-600">{article.excerpt}</p>
+        <p className="text-sm text-gray-600 line-clamp-3">{stripHtmlTags(post.excerpt.rendered)}</p>
       </CardContent>
       <CardFooter>
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-secondary-red hover:underline text-sm font-medium"
-        >
+        <a href={`/post/${postSlug}`} className="text-secondary-red hover:underline text-sm font-medium">
           Read More →
         </a>
       </CardFooter>
