@@ -142,6 +142,7 @@ export function Header() {
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const timeoutRef = useRef<{ [key: string]: NodeJS.Timeout | null }>({})
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [logoLoaded, setLogoLoaded] = useState(false)
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -436,13 +437,23 @@ export function Header() {
         {/* Top row with logo and menu button */}
         <div className="flex justify-between items-center py-2">
           <Link href="/" className="flex items-center space-x-2">
-            <Image
-              src="/images/ct-house-gop-logo.jpg"
-              alt="Connecticut House Republicans"
-              width={200}
-              height={50}
-              className="h-14 w-auto"
-            />
+            <div className="relative h-14 w-[240px]">
+              {/* Placeholder for logo while loading */}
+              {!logoLoaded && <div className="absolute inset-0 bg-gray-100 animate-pulse rounded"></div>}
+              <Image
+                src="/images/ct_house_gop_logo.webp"
+                alt="Connecticut House Republicans"
+                width={240}
+                height={56}
+                className={cn(
+                  "h-auto w-auto transition-opacity duration-300",
+                  logoLoaded ? "opacity-100" : "opacity-0",
+                )}
+                onLoad={() => setLogoLoaded(true)}
+                loading="lazy"
+                priority={false}
+              />
+            </div>
           </Link>
 
           {/* Mobile Menu Button */}
@@ -457,13 +468,16 @@ export function Header() {
               <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
                 <div className="py-4">
                   <Link href="/" className="mb-6 flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
-                    <Image
-                      src="/images/ct-house-gop-logo.jpg"
-                      alt="Connecticut House Republicans"
-                      width={150}
-                      height={40}
-                      className="h-10 w-auto"
-                    />
+                    <div className="relative h-10 w-[170px]">
+                      <Image
+                        src="/images/ct_house_gop_logo.webp"
+                        alt="Connecticut House Republicans"
+                        width={170}
+                        height={40}
+                        className="h-auto w-auto"
+                        loading="lazy"
+                      />
+                    </div>
                   </Link>
 
                   {/* Sheet Navigation */}
