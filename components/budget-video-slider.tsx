@@ -185,6 +185,17 @@ export function BudgetVideoSlider() {
       <div className="container mx-auto max-w-6xl">
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold text-primary-navy mb-4">Reality Check Budget</h2>
+          <div className="flex justify-center mb-6">
+            <Image
+              src="https://www.cthousegop.com/wp-content/uploads/2025/04/483233292_1346994719868798_7975581270295086386_n-1.png"
+              alt="CT House GOP Logo"
+              width={150}
+              height={150}
+              className="rounded-full"
+              unoptimized={true}
+              loading="lazy"
+            />
+          </div>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Explore our responsible budget plan that spends less while delivering real tax relief for Connecticut
             residents.
