@@ -183,20 +183,21 @@ export function BudgetVideoSlider() {
   return (
     <section className="py-12 px-4 bg-[#F5F5F5] overflow-hidden">
       <div className="container mx-auto max-w-6xl">
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold text-primary-navy mb-4">Reality Check Budget</h2>
-          <div className="flex justify-center mb-6">
-            <Image
-              src="https://www.cthousegop.com/wp-content/uploads/2025/04/483233292_1346994719868798_7975581270295086386_n-1.png"
-              alt="CT House GOP Logo"
-              width={150}
-              height={150}
-              className="rounded-full"
-              unoptimized={true}
-              loading="lazy"
-            />
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold text-primary-navy">Reality Check Budget</h2>
+            <div className="flex-shrink-0">
+              <img
+                src="https://www.cthousegop.com/wp-content/uploads/2025/04/483233292_1346994719868798_7975581270295086386_n-1.png"
+                alt="CT House GOP Logo"
+                width={120}
+                height={120}
+                className="rounded-full"
+                loading="lazy"
+              />
+            </div>
           </div>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 max-w-2xl mt-4">
             Explore our responsible budget plan that spends less while delivering real tax relief for Connecticut
             residents.
           </p>
