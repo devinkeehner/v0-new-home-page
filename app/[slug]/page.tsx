@@ -7,31 +7,43 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { fallbackPosts, formatWordPressDate, stripHtmlTags, getFeaturedImageUrl } from "@/lib/api"
 import "./post.css"
+import { getCachedData } from "@/lib/kv"
 
 // Function to fetch a single post by slug
 async function getPostBySlug(slug: string) {
   try {
-    const response = await fetch(`https://www.cthousegop.com/wp-json/wp/v2/posts?slug=${slug}&_embed`, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+    // Create a cache key based on the slug
+    const cacheKey = `wordpress:post:${slug}`
+
+    return await getCachedData(
+      cacheKey,
+      async () => {
+        console.log(`Cache miss for post with slug: ${slug}, fetching fresh data`)
+
+        const response = await fetch(`https://www.cthousegop.com/wp-json/wp/v2/posts?slug=${slug}&_embed`, {
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+          next: { revalidate: 0 },
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch post: ${response.status}`)
+        }
+
+        const posts = await response.json()
+
+        // The API returns an array, but we only need the first post
+        if (posts && posts.length > 0) {
+          return posts[0]
+        }
+
+        return null
       },
-      cache: "no-store",
-      next: { revalidate: 0 },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch post: ${response.status}`)
-    }
-
-    const posts = await response.json()
-
-    // The API returns an array, but we only need the first post
-    if (posts && posts.length > 0) {
-      return posts[0]
-    }
-
-    return null
+      300, // 5 minutes cache
+    )
   } catch (error) {
     console.error("Error fetching post:", error)
     return null
@@ -41,24 +53,34 @@ async function getPostBySlug(slug: string) {
 // Function to fetch recent posts for the sidebar
 async function getRecentPosts(excludeId: number) {
   try {
-    const response = await fetch(
-      `https://www.cthousegop.com/wp-json/wp/v2/posts?per_page=2&exclude=${excludeId}&_embed`,
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-        next: { revalidate: 0 },
+    // Create a cache key based on the excluded ID
+    const cacheKey = `wordpress:posts:recent:exclude:${excludeId}`
+
+    return await getCachedData(
+      cacheKey,
+      async () => {
+        console.log(`Cache miss for recent posts (excluding ${excludeId}), fetching fresh data`)
+
+        const response = await fetch(
+          `https://www.cthousegop.com/wp-json/wp/v2/posts?per_page=2&exclude=${excludeId}&_embed`,
+          {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            cache: "no-store",
+            next: { revalidate: 0 },
+          },
+        )
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch recent posts: ${response.status}`)
+        }
+
+        return await response.json()
       },
+      300, // 5 minutes cache
     )
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch recent posts: ${response.status}`)
-    }
-
-    const posts = await response.json()
-    return posts
   } catch (error) {
     console.error("Error fetching recent posts:", error)
     return fallbackPosts.slice(0, 2)

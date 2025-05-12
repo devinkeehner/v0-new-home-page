@@ -3,24 +3,36 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { fallbackPosts, formatWordPressDate, stripHtmlTags, getFeaturedImageUrl } from "@/lib/api"
+import { getCachedData } from "@/lib/kv"
 
 async function getPosts() {
   try {
-    const response = await fetch("https://www.cthousegop.com/wp-json/wp/v2/posts?_embed&per_page=12", {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+    // Use caching for WordPress posts
+    const cacheKey = "wordpress:posts:newsroom"
+
+    return await getCachedData(
+      cacheKey,
+      async () => {
+        // This function only runs on cache miss
+        console.log("Cache miss for newsroom posts, fetching fresh data")
+
+        const response = await fetch("https://www.cthousegop.com/wp-json/wp/v2/posts?_embed&per_page=12", {
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+          next: { revalidate: 0 },
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch posts: ${response.status}`)
+        }
+
+        return await response.json()
       },
-      cache: "no-store",
-      next: { revalidate: 0 },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch posts: ${response.status}`)
-    }
-
-    const posts = await response.json()
-    return posts
+      300, // 5 minutes cache
+    )
   } catch (error) {
     console.error("Error fetching posts:", error)
     return fallbackPosts

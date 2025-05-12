@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { getCachedData } from "@/lib/kv"
 
 // Flickr API credentials
 const FLICKR_API_KEY = process.env.flick_key || "73b5dd919d6a510e2a2326f637b8aa21"
@@ -11,18 +12,28 @@ export async function GET(request: Request) {
   const perPage = searchParams.get("per_page") || "20"
 
   try {
-    // Try an alternative API endpoint that might work better
-    const apiUrl = `https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&user_id=${FLICKR_USER_ID}&tags=${tag}&tag_mode=any&per_page=${perPage}&format=json&nojsoncallback=1&extras=url_sq,url_t,url_s,url_m,url_o,date_taken,owner_name,views,description`
+    // Create a cache key based on the request parameters
+    const cacheKey = `flickr-alt:${tag}:${perPage}`
 
-    console.log(`Trying alternative Flickr API endpoint: ${apiUrl.replace(FLICKR_API_KEY, "API_KEY_HIDDEN")}`)
+    // Use the caching utility
+    const data = await getCachedData(
+      cacheKey,
+      async () => {
+        // This function only runs on cache miss
+        const apiUrl = `https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&user_id=${FLICKR_USER_ID}&tags=${tag}&tag_mode=any&per_page=${perPage}&format=json&nojsoncallback=1&extras=url_sq,url_t,url_s,url_m,url_o,date_taken,owner_name,views,description`
 
-    const response = await fetch(apiUrl)
+        console.log(`Fetching from Flickr API: ${apiUrl.replace(FLICKR_API_KEY, "API_KEY_HIDDEN")}`)
 
-    if (!response.ok) {
-      throw new Error(`Flickr API error: ${response.status} ${response.statusText}`)
-    }
+        const response = await fetch(apiUrl)
 
-    const data = await response.json()
+        if (!response.ok) {
+          throw new Error(`Flickr API error: ${response.status} ${response.statusText}`)
+        }
+
+        return await response.json()
+      },
+      300, // 5 minutes cache
+    )
 
     // Validate the response structure
     if (!data || data.stat !== "ok" || !data.photos || !Array.isArray(data.photos.photo)) {
@@ -32,7 +43,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(data, {
       headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       },
     })
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { fetchFlickrImages } from "@/lib/flickr"
+import { getCachedData } from "@/lib/kv"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -7,13 +8,19 @@ export async function GET(request: Request) {
   const perPage = Number.parseInt(searchParams.get("per_page") || "20", 10)
 
   try {
-    const photos = await fetchFlickrImages(perPage)
+    // Use the caching utility with a 5-minute TTL
+    const cacheKey = `flickr:${tag}:${perPage}`
+    const photos = await getCachedData(
+      cacheKey,
+      () => fetchFlickrImages(perPage),
+      300, // 5 minutes cache
+    )
 
     return NextResponse.json(
       { photos, status: "success" },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
         },
       },
     )

@@ -1,3 +1,6 @@
+// Add this import at the top
+import { getCachedData } from "@/lib/kv"
+
 // Update the existing api.ts file to include content rendering
 
 // Sample fallback data in case the API fails
@@ -135,35 +138,47 @@ function extractJsonFromMixedResponse(text: string): any {
 
 export async function getWordPressPosts() {
   try {
-    // Use a more robust fetch with proper headers and cache control
-    const response = await fetch(
-      "https://www.cthousegop.com/wp-json/wp/v2/posts?status=publish&per_page=20&orderby=date&order=desc&_embed",
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        cache: "no-store", // Don't cache the response to avoid stale data
-        next: { revalidate: 0 }, // Disable revalidation for now
+    // Use caching for WordPress posts
+    const cacheKey = "wordpress:posts:recent"
+
+    return await getCachedData(
+      cacheKey,
+      async () => {
+        // This function only runs on cache miss
+        console.log("Cache miss for WordPress posts, fetching fresh data")
+
+        // Use a more robust fetch with proper headers and cache control
+        const response = await fetch(
+          "https://www.cthousegop.com/wp-json/wp/v2/posts?status=publish&per_page=20&orderby=date&order=desc&_embed",
+          {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            cache: "no-store", // Don't cache the response to avoid stale data
+            next: { revalidate: 0 }, // Disable revalidation for now
+          },
+        )
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch posts: ${response.status}`)
+        }
+
+        // Get the response text instead of directly parsing as JSON
+        const responseText = await response.text()
+
+        // Try to extract JSON from the potentially mixed response
+        try {
+          const posts = extractJsonFromMixedResponse(responseText)
+          return posts
+        } catch (parseError) {
+          console.error("Error parsing WordPress response:", parseError)
+          console.log("Response preview:", responseText.substring(0, 500))
+          return fallbackPosts
+        }
       },
+      300, // 5 minutes cache
     )
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch posts: ${response.status}`)
-    }
-
-    // Get the response text instead of directly parsing as JSON
-    const responseText = await response.text()
-
-    // Try to extract JSON from the potentially mixed response
-    try {
-      const posts = extractJsonFromMixedResponse(responseText)
-      return posts
-    } catch (parseError) {
-      console.error("Error parsing WordPress response:", parseError)
-      console.log("Response preview:", responseText.substring(0, 500))
-      return fallbackPosts
-    }
   } catch (error) {
     console.error("Error fetching WordPress posts:", error)
     // Return fallback data instead of empty array
