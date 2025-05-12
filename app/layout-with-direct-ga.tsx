@@ -6,21 +6,19 @@ import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
-import { AnalyticsScripts } from "@/components/analytics-scripts"
-import { Suspense } from "react"
 
 // Google Font alternatives based on branding guidelines
 const headingFont = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-heading",
-}) // Alternative for Kranto
+})
 
 const bodyFont = Source_Sans_3({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-body",
-}) // Source Sans as specified
+})
 
 const workSans = Work_Sans({
   subsets: ["latin"],
@@ -31,7 +29,6 @@ const workSans = Work_Sans({
 export const metadata: Metadata = {
   title: "Connecticut House Republicans",
   description: "Official website of the Connecticut House Republicans",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -67,18 +64,26 @@ export default function RootLayout({
           />
         </noscript>
         {/* End Meta Pixel Code */}
+
+        {/* Google Analytics - Direct implementation in head */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-QBXDQ0WXNK" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-QBXDQ0WXNK', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
       </head>
       <body className={`${headingFont.variable} ${bodyFont.variable} ${workSans.variable} font-body`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <Header />
-          <Suspense>
-            <main>{children}</main>
-          </Suspense>
+          <main>{children}</main>
           <Footer />
         </ThemeProvider>
-
-        {/* Google Analytics - placed at the end of body */}
-        <AnalyticsScripts />
       </body>
     </html>
   )
