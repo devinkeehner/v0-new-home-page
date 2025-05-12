@@ -336,7 +336,7 @@ export default function SocialFeedEmbed() {
               <div className="flex items-center gap-3 border-b p-3">
                 <div className="relative h-10 w-10 overflow-hidden rounded-full">
                   <Image
-                    src="/images/ct-house-gop-optimized.webp"
+                    src="https://www.cthousegop.com/wp-content/uploads/2025/01/ct_house_gop_with_background.jpg"
                     alt="Connecticut House Republicans"
                     width={40}
                     height={40}
