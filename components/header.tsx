@@ -441,7 +441,7 @@ export function Header() {
               {/* Placeholder for logo while loading */}
               {!logoLoaded && <div className="absolute inset-0 bg-gray-100 animate-pulse rounded"></div>}
               <Image
-                src="/images/ct_house_gop_logo.webp"
+                src="https://www.cthousegop.com/wp-content/uploads/2025/05/ct_house_gop_logo-e1746997158682.webp"
                 alt="Connecticut House Republicans"
                 width={240}
                 height={56}
@@ -452,6 +452,7 @@ export function Header() {
                 onLoad={() => setLogoLoaded(true)}
                 loading="lazy"
                 priority={false}
+                unoptimized={true}
               />
             </div>
           </Link>
@@ -470,12 +471,13 @@ export function Header() {
                   <Link href="/" className="mb-6 flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
                     <div className="relative h-10 w-[170px]">
                       <Image
-                        src="/images/ct_house_gop_logo.webp"
+                        src="https://www.cthousegop.com/wp-content/uploads/2025/05/ct_house_gop_logo-e1746997158682.webp"
                         alt="Connecticut House Republicans"
                         width={170}
                         height={40}
                         className="h-auto w-auto"
                         loading="lazy"
+                        unoptimized={true}
                       />
                     </div>
                   </Link>
