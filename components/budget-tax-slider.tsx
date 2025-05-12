@@ -400,7 +400,7 @@ export function BudgetTaxSlider() {
                     {index === 0 && (
                       <div className="relative h-64 w-64 overflow-hidden rounded-full border-4 border-white md:h-80 md:w-80">
                         <Image
-                          src="/images/ct-house-gop-optimized.webp"
+                          src="https://www.cthousegop.com/wp-content/uploads/2025/04/483233292_1346994719868798_7975581270295086386_n-1.png"
                           alt="Connecticut House Republicans"
                           fill
                           className="object-contain"
