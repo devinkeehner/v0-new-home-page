@@ -157,7 +157,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
                       </div>
                     )}
                     <CardContent className="p-4">
-                      <Link href={`/post/${recentPostSlug}`}>
+                      <Link href={`/${recentPostSlug}`}>
                         <h3
                           className="mb-2 text-lg font-bold text-secondary-red hover:underline"
                           dangerouslySetInnerHTML={{ __html: recentPost.title.rendered }}
@@ -168,7 +168,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
                         {stripHtmlTags(recentPost.excerpt.rendered)}
                       </p>
                       <Button asChild className="bg-secondary-red hover:bg-secondary-red/90" size="sm">
-                        <Link href={`/post/${recentPostSlug}`}>Read More</Link>
+                        <Link href={`/${recentPostSlug}`}>Read More</Link>
                       </Button>
                     </CardContent>
                   </Card>
