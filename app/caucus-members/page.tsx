@@ -9,7 +9,7 @@ export default function CaucusMembersPage() {
 
       <div className="mb-8">
         <p className="mb-4">
-          The House Republican Caucus includes 53 state representatives from throughout Connecticut who serve in the
+          The House Republican Caucus includes 43 state representatives from throughout Connecticut who serve in the
           151-seat{" "}
           <a
             href="https://www.cga.ct.gov/asp/menu/house.asp"
