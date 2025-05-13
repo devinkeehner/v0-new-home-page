@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     // Create a cache key based on the request parameters
     const cacheKey = `flickr-alt:${tag}:${perPage}`
 
-    // Use the caching utility with a longer timeout
+    // Use the caching utility
     const data = await getCachedData(
       cacheKey,
       async () => {
@@ -24,92 +24,36 @@ export async function GET(request: Request) {
 
         console.log(`Fetching from Flickr API: ${apiUrl.replace(FLICKR_API_KEY, "API_KEY_HIDDEN")}`)
 
-        // Add timeout and retry logic
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+        const response = await fetch(apiUrl)
 
-        try {
-          const response = await fetch(apiUrl, {
-            signal: controller.signal,
-            headers: {
-              Accept: "application/json",
-              "User-Agent": "CT House Republicans Website",
-            },
-          })
-
-          clearTimeout(timeoutId)
-
-          if (!response.ok) {
-            console.error(`Flickr API HTTP error: ${response.status} ${response.statusText}`)
-            throw new Error(`Flickr API error: ${response.status} ${response.statusText}`)
-          }
-
-          const jsonData = await response.json()
-
-          // Log the response for debugging
-          console.log("Flickr API response:", JSON.stringify(jsonData).substring(0, 200) + "...")
-
-          return jsonData
-        } catch (fetchError) {
-          clearTimeout(timeoutId)
-          throw fetchError
+        if (!response.ok) {
+          throw new Error(`Flickr API error: ${response.status} ${response.statusText}`)
         }
+
+        return await response.json()
       },
-      600, // 10 minutes cache - increased to reduce API calls
+      300, // 5 minutes cache
     )
 
-    // More lenient validation with fallback
-    if (!data) {
-      console.error("Empty response from Flickr API")
-      return NextResponse.json(
-        {
-          stat: "ok",
-          photos: { photo: [] },
-        },
-        { status: 200 },
-      )
-    }
-
-    // If we get an error response from Flickr, log it but don't throw
-    if (data.stat !== "ok") {
-      console.error("Flickr API returned error:", data)
-      return NextResponse.json(
-        {
-          stat: "ok",
-          photos: { photo: [] },
-          originalError: data,
-        },
-        { status: 200 },
-      )
-    }
-
-    // If photos structure is missing, create an empty one
-    if (!data.photos || !Array.isArray(data.photos.photo)) {
+    // Validate the response structure
+    if (!data || data.stat !== "ok" || !data.photos || !Array.isArray(data.photos.photo)) {
       console.error("Unexpected Flickr API response structure:", JSON.stringify(data).substring(0, 500))
-      data.photos = { photo: [] }
+      throw new Error("Unexpected response format from Flickr API")
     }
 
     return NextResponse.json(data, {
       headers: {
-        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=1200",
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       },
     })
   } catch (error) {
     console.error("Error fetching from alternative Flickr API:", error)
-
-    // Return a valid but empty response instead of an error
     return NextResponse.json(
       {
-        stat: "ok",
-        photos: { photo: [] },
         error: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.stack : undefined,
       },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-        },
-      },
+      { status: 500 },
     )
   }
 }

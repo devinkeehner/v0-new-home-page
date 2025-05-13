@@ -14,16 +14,8 @@ export default function FlickrGallery() {
   const [selectedPhoto, setSelectedPhoto] = useState<FlickrPhoto | null>(null)
   const galleryRef = useRef<HTMLDivElement>(null)
   const [useFallback, setUseFallback] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  // Fix hydration issues by only rendering after mount
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
-    if (!mounted) return
-
     const loadPhotos = async () => {
       try {
         setLoading(true)
@@ -52,12 +44,11 @@ export default function FlickrGallery() {
     }
 
     loadPhotos()
-  }, [mounted])
+  }, [])
 
   // Get fallback photos
   const getFallbackPhotos = (): FlickrPhoto[] => {
     console.log("Generating fallback photos")
-    // Use a stable seed for random placeholder images to avoid hydration mismatches
     const fallbackPhotos = Array.from({ length: 12 }, (_, i) => ({
       id: `fallback-${i}`,
       title: `Connecticut House Republicans - Photo ${i + 1}`,
@@ -68,7 +59,7 @@ export default function FlickrGallery() {
       medium: `/placeholder.svg?height=500&width=500&query=connecticut legislature event ${i + 1}`,
       large: `/placeholder.svg?height=1024&width=1024&query=connecticut legislature event ${i + 1}`,
       original: `/placeholder.svg?height=1024&width=1024&query=connecticut legislature event ${i + 1}`,
-      datetaken: "2023-01-01T00:00:00Z", // Use a fixed date to avoid hydration issues
+      datetaken: new Date().toISOString(),
       ownername: "Connecticut House Republicans",
       views: "0",
     }))
@@ -78,7 +69,7 @@ export default function FlickrGallery() {
 
   // Implement lazy loading with Intersection Observer
   useEffect(() => {
-    if (!mounted || !galleryRef.current || photos.length === 0) return
+    if (!galleryRef.current || photos.length === 0) return
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -109,7 +100,7 @@ export default function FlickrGallery() {
       images.forEach((img) => observer.unobserve(img))
       observer.disconnect()
     }
-  }, [photos, mounted])
+  }, [photos])
 
   const openPhotoModal = (photo: FlickrPhoto) => {
     setSelectedPhoto(photo)
@@ -117,19 +108,6 @@ export default function FlickrGallery() {
 
   const closePhotoModal = () => {
     setSelectedPhoto(null)
-  }
-
-  // If not mounted yet, return a simple loading state to avoid hydration issues
-  if (!mounted) {
-    return (
-      <section className="py-12">
-        <div className="container">
-          <div className="flex items-center justify-center py-12">
-            <div className="h-10 w-10 rounded-full border-4 border-gray-300 border-t-secondary-red animate-spin"></div>
-          </div>
-        </div>
-      </section>
-    )
   }
 
   return (
@@ -167,8 +145,7 @@ export default function FlickrGallery() {
                     data-src={
                       photo.medium ||
                       photo.thumbnail ||
-                      "/placeholder.svg?height=500&width=500&query=connecticut legislature" ||
-                      "/placeholder.svg"
+                      "/placeholder.svg?height=500&width=500&query=connecticut legislature"
                     }
                     alt={photo.title}
                     className="h-full w-full object-cover hover-zoom opacity-0"
@@ -240,3 +217,5 @@ export default function FlickrGallery() {
     </section>
   )
 }
+
+const USER_ID = "67565175@N02"

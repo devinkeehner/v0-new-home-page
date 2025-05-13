@@ -39,12 +39,6 @@ export default function SocialFeedEmbed() {
     src: "",
     type: "image",
   })
-  const [mounted, setMounted] = useState(false)
-
-  // Fix hydration issues by only rendering after mount
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const feedUrls = [
     "https://www.cthousegop.com/social-link-6/",
@@ -57,17 +51,8 @@ export default function SocialFeedEmbed() {
       setLoading(true)
       console.log(`Fetching social feed from: ${feedUrls[urlIndex]}`)
 
-      // Use absolute URL with current origin to avoid CORS issues
-      const apiUrl = new URL("/api/proxy", window.location.origin).toString()
-      const response = await fetch(`${apiUrl}?url=${encodeURIComponent(feedUrls[urlIndex])}`, {
-        // Add these options for better cross-domain resilience
-        credentials: "same-origin",
-        cache: "no-store", // Bypass Cloudflare cache for API calls
-        headers: {
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-        },
-      })
+      // Use our proxy API route to avoid CORS issues
+      const response = await fetch(`/api/proxy?url=${encodeURIComponent(feedUrls[urlIndex])}`)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -221,17 +206,13 @@ export default function SocialFeedEmbed() {
     }
   }
 
-  // Initial load - only after component is mounted to avoid hydration issues
+  // Initial load
   useEffect(() => {
-    if (mounted) {
-      fetchSocialFeed(0)
-    }
-  }, [mounted])
+    fetchSocialFeed(0)
+  }, [])
 
   // Force reflow of columns after posts are loaded
   useEffect(() => {
-    if (!mounted) return
-
     if (posts.length > 0 && containerRef.current) {
       // Force a reflow by temporarily changing a property
       const container = containerRef.current
@@ -244,7 +225,7 @@ export default function SocialFeedEmbed() {
       // Restore the original display value
       container.style.display = originalDisplay
     }
-  }, [posts, mounted])
+  }, [posts])
 
   // Handle load more button click
   const handleLoadMore = () => {
@@ -313,20 +294,6 @@ export default function SocialFeedEmbed() {
 
     // If we can't extract the ID, just use the post URL
     return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(postUrl)}&width=500&show_text=false`
-  }
-
-  // If not mounted yet, return a simple loading state to avoid hydration issues
-  if (!mounted) {
-    return (
-      <section className="bg-light-blue/20 py-12">
-        <div className="container">
-          <h2 className="mb-8 text-center text-3xl font-bold text-primary-navy">Social Media</h2>
-          <div className="flex items-center justify-center py-12">
-            <div className="h-10 w-10 rounded-full border-4 border-gray-300 border-t-secondary-red animate-spin"></div>
-          </div>
-        </div>
-      </section>
-    )
   }
 
   return (
