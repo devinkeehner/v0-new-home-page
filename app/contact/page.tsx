@@ -11,9 +11,10 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, Loader2 } from "lucide-react"
 import { getCaucusMembers } from "@/lib/caucus_members_data"
 import { submitContactForm } from "@/app/actions/contact-form-action"
+import ReCaptcha from "@/components/recaptcha"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -34,10 +35,10 @@ export default function ContactPage() {
   const [submissionDetails, setSubmissionDetails] = useState({
     date: "",
     time: "",
-    reference: "",
   })
   const [representatives, setRepresentatives] = useState<string[]>(["To General Mailbox"])
   const [formError, setFormError] = useState<string | null>(null)
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
 
   useEffect(() => {
     const loadRepresentatives = async () => {
@@ -74,23 +75,26 @@ export default function ContactPage() {
     }))
   }
 
+  const handleRecaptchaVerify = (token: string) => {
+    setRecaptchaToken(token)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!recaptchaToken) {
+      setFormError("Please wait for reCAPTCHA verification to complete")
+      return
+    }
+
     setIsSubmitting(true)
+    setFormError(null)
 
     try {
       // Submit form data to Gravity Forms via server action
       const result = await submitContactForm({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        zip: formData.zip,
-        issues: formData.issues,
-        representative: formData.representative,
-        message: formData.message,
+        ...formData,
+        recaptchaToken,
       })
 
       if (result.success) {
@@ -99,11 +103,6 @@ export default function ContactPage() {
         setSubmissionDetails({
           date: new Date().toLocaleDateString(),
           time: new Date().toLocaleTimeString(),
-          reference:
-            result.reference ||
-            `REF-${Math.floor(Math.random() * 1000000)
-              .toString()
-              .padStart(6, "0")}`,
         })
       } else {
         // Handle error
@@ -162,17 +161,11 @@ export default function ContactPage() {
                       <span className="font-medium">Time:</span> {submissionDetails.time}
                     </li>
                     <li>
-                      <span className="font-medium">Reference Number:</span> {submissionDetails.reference}
-                    </li>
-                    <li>
                       <span className="font-medium">Recipient:</span> {formData.representative}
                     </li>
                   </ul>
                 </div>
-                <p className="text-sm">
-                  Please save this reference number for your records. If you need to follow up on your message, please
-                  mention this reference number.
-                </p>
+                <p className="text-sm">If you need to follow up on your message, please contact our office directly.</p>
               </AlertDescription>
             </Alert>
             <div className="mt-6 text-center">
@@ -303,8 +296,18 @@ export default function ContactPage() {
               />
             </div>
 
-            <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Submitting..." : "Submit"}
+            {/* reCAPTCHA component */}
+            <ReCaptcha onVerify={handleRecaptchaVerify} action="contact_form" />
+
+            <Button type="submit" disabled={isSubmitting || !recaptchaToken} className="w-full">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
             </Button>
 
             {formError && (

@@ -1,5 +1,7 @@
 "use server"
 
+import { verifyRecaptchaToken } from "@/lib/recaptcha"
+
 // This file provides a server action to submit the contact form to Gravity Forms
 
 export async function submitContactForm(formData: {
@@ -13,32 +15,63 @@ export async function submitContactForm(formData: {
   issues?: string[]
   representative?: string
   message: string
+  recaptchaToken?: string
 }) {
   // These should be set in your Vercel project environment variables
   const GF_API_KEY = process.env.GF_API_KEY
   const GF_API_SECRET = process.env.GF_API_SECRET
   const WP_URL = process.env.WP_URL || "https://www.cthousegop.com"
-  const CONTACT_FORM_ID = process.env.CONTACT_FORM_ID || "21" // Using a different form ID for contact form
+  const FORM_ID = "9" // Using the correct form ID for contact form
 
   if (!GF_API_KEY || !GF_API_SECRET) {
     throw new Error("Gravity Forms API credentials are not set in environment variables.")
   }
 
+  // Verify reCAPTCHA token if provided
+  if (formData.recaptchaToken) {
+    const recaptchaResult = await verifyRecaptchaToken(formData.recaptchaToken)
+
+    if (!recaptchaResult.success) {
+      return {
+        success: false,
+        error: recaptchaResult.error || "reCAPTCHA verification failed",
+      }
+    }
+
+    // Optional: Check score threshold (0.0 to 1.0, where 1.0 is very likely a good interaction)
+    if (recaptchaResult.score && recaptchaResult.score < 0.5) {
+      return {
+        success: false,
+        error: "Suspicious activity detected. Please try again.",
+      }
+    }
+  } else {
+    // If reCAPTCHA token is required but not provided
+    return {
+      success: false,
+      error: "reCAPTCHA verification is required",
+    }
+  }
+
   try {
-    const url = `${WP_URL}/wp-json/gf/v2/forms/${CONTACT_FORM_ID}/submissions`
+    const url = `${WP_URL}/wp-json/gf/v2/forms/${FORM_ID}/submissions`
 
     // Map our form fields to Gravity Form input IDs using the flattened format for address fields
-    const payload = {
-      input_1: formData.firstName,
-      input_2: formData.lastName,
-      input_3: formData.email,
-      input_4: formData.phone || "",
-      input_5: formData.address || "",
-      input_6_3: formData.city || "", // Address - City (Field ID 6, Subfield 3)
-      input_6_5: formData.zip || "", // Address - ZIP (Field ID 6, Subfield 5)
-      input_8: formData.issues ? formData.issues.join(", ") : "",
-      input_9: formData.representative || "To General Mailbox",
-      input_10: formData.message,
+    const payload: Record<string, any> = {
+      input_1_3: formData.firstName, // Name field (ID 1, subfield 3)
+      input_1_6: formData.lastName, // Name field (ID 1, subfield 6)
+      input_3: formData.email, // Email (ID 3)
+      input_6: formData.phone || "", // Phone (ID 6)
+      input_2_1: formData.address || "", // Address field (ID 2, subfield 1)
+      input_2_3: formData.city || "", // Address field (ID 2, subfield 3)
+      input_2_5: formData.zip || "", // Address field (ID 2, subfield 5)
+      input_7: formData.representative || "To General Mailbox", // Select (ID 7)
+      input_4: formData.message, // Textarea (ID 4)
+    }
+
+    // Handle issues (checkboxes, field ID 9)
+    if (formData.issues && formData.issues.length > 0) {
+      payload.input_9 = formData.issues
     }
 
     const auth = Buffer.from(`${GF_API_KEY}:${GF_API_SECRET}`).toString("base64")
@@ -68,9 +101,6 @@ export async function submitContactForm(formData: {
     return {
       success: true,
       data: result,
-      reference: `REF-${Math.floor(Math.random() * 1000000)
-        .toString()
-        .padStart(6, "0")}`,
     }
   } catch (error) {
     console.error("Contact form submission error:", error)
