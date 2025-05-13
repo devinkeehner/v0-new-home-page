@@ -1,7 +1,5 @@
 "use server"
 
-import { verifyRecaptchaToken } from "@/lib/recaptcha"
-
 // This file provides a server action to submit the contact form to Gravity Forms
 
 export async function submitContactForm(formData: {
@@ -15,7 +13,6 @@ export async function submitContactForm(formData: {
   issues?: string[]
   representative?: string
   message: string
-  recaptchaToken?: string
 }) {
   // These should be set in your Vercel project environment variables
   const GF_API_KEY = process.env.GF_API_KEY
@@ -25,32 +22,6 @@ export async function submitContactForm(formData: {
 
   if (!GF_API_KEY || !GF_API_SECRET) {
     throw new Error("Gravity Forms API credentials are not set in environment variables.")
-  }
-
-  // Verify reCAPTCHA token if provided
-  if (formData.recaptchaToken) {
-    const recaptchaResult = await verifyRecaptchaToken(formData.recaptchaToken)
-
-    if (!recaptchaResult.success) {
-      return {
-        success: false,
-        error: recaptchaResult.error || "reCAPTCHA verification failed",
-      }
-    }
-
-    // Optional: Check score threshold (0.0 to 1.0, where 1.0 is very likely a good interaction)
-    if (recaptchaResult.score && recaptchaResult.score < 0.5) {
-      return {
-        success: false,
-        error: "Suspicious activity detected. Please try again.",
-      }
-    }
-  } else {
-    // If reCAPTCHA token is required but not provided
-    return {
-      success: false,
-      error: "reCAPTCHA verification is required",
-    }
   }
 
   try {
