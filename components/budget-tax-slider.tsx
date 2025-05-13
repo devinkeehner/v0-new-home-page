@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight, ExternalLink, CheckCircle } from "lucide-react"
+import { ChevronLeft, ChevronRight, ExternalLink, CheckCircle, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { submitNewsletterForm } from "@/app/actions/form-actions"
 
 // Define the tax relief options for the second slide
 const taxReliefOptions = [
@@ -69,8 +70,11 @@ export function BudgetTaxSlider() {
     zipCode: "",
     firstName: "",
     lastName: "",
+    city: "", // Add city field
   })
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
   // Auto-advance slides
   useEffect(() => {
@@ -87,6 +91,7 @@ export function BudgetTaxSlider() {
   useEffect(() => {
     setFormSubmitted(false)
     setIsExpanded(false)
+    setFormError(null)
   }, [currentSlide])
 
   const nextSlide = () => {
@@ -110,39 +115,69 @@ export function BudgetTaxSlider() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    setFormError(null)
 
-    // Show toast notification
-    toast({
-      title: "Success!",
-      description: "Thank you for signing up for updates.",
-    })
+    try {
+      // Submit form data to Gravity Forms via server action
+      const result = await submitNewsletterForm(formData)
 
-    // Show inline confirmation
-    setFormSubmitted(true)
+      if (result.success) {
+        // Show toast notification
+        toast({
+          title: "Success!",
+          description: "Thank you for signing up for updates.",
+        })
 
-    // Reset form after a delay
-    setTimeout(() => {
-      setFormData({
-        email: "",
-        mobile: "",
-        zipCode: "",
-        firstName: "",
-        lastName: "",
+        // Show inline confirmation
+        setFormSubmitted(true)
+
+        // Reset form after a delay
+        setTimeout(() => {
+          setFormData({
+            email: "",
+            mobile: "",
+            zipCode: "",
+            firstName: "",
+            lastName: "",
+            city: "", // Add city field
+          })
+        }, 500)
+      } else {
+        // Handle error
+        setFormError(result.error || "There was a problem submitting your form. Please try again.")
+        toast({
+          title: "Error",
+          description: result.error || "There was a problem submitting your form. Please try again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Form submission error:", error)
+      setFormError("There was a problem submitting your form. Please try again.")
+      toast({
+        title: "Error",
+        description: "There was a problem submitting your form. Please try again.",
+        variant: "destructive",
       })
-    }, 500)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const resetForm = () => {
     setFormSubmitted(false)
     setIsExpanded(false)
+    setFormError(null)
     setFormData({
       email: "",
       mobile: "",
       zipCode: "",
       firstName: "",
       lastName: "",
+      city: "", // Add city field
     })
   }
 
@@ -281,8 +316,16 @@ export function BudgetTaxSlider() {
                                     type="submit"
                                     className="bg-secondary-red hover:bg-secondary-red/90"
                                     onClick={handleFocus}
+                                    disabled={isSubmitting}
                                   >
-                                    Sign Up
+                                    {isSubmitting ? (
+                                      <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Submitting...
+                                      </>
+                                    ) : (
+                                      "Sign Up"
+                                    )}
                                   </Button>
                                 </div>
                               </>
@@ -329,8 +372,16 @@ export function BudgetTaxSlider() {
                                   />
                                 </div>
 
-                                {/* Row 3: Zip code (1/5) Submit button (4/5) */}
+                                {/* Add a new row for city */}
                                 <div className="grid grid-cols-5 gap-3">
+                                  <Input
+                                    type="text"
+                                    name="city"
+                                    placeholder="City"
+                                    value={formData.city}
+                                    onChange={handleInputChange}
+                                    className="col-span-4 bg-white text-primary-navy"
+                                  />
                                   <Input
                                     type="text"
                                     name="zipCode"
@@ -339,14 +390,31 @@ export function BudgetTaxSlider() {
                                     onChange={handleInputChange}
                                     className="col-span-1 bg-white text-primary-navy"
                                   />
-                                  <Button
-                                    type="submit"
-                                    className="col-span-4 bg-secondary-red hover:bg-secondary-red/90"
-                                  >
-                                    Sign Up for Updates
-                                  </Button>
                                 </div>
+
+                                {/* Row 3: Submit button (full width) */}
+                                <Button
+                                  type="submit"
+                                  className="w-full bg-secondary-red hover:bg-secondary-red/90"
+                                  disabled={isSubmitting}
+                                >
+                                  {isSubmitting ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Submitting...
+                                    </>
+                                  ) : (
+                                    "Sign Up for Updates"
+                                  )}
+                                </Button>
                               </>
+                            )}
+
+                            {/* Display form error if any */}
+                            {formError && (
+                              <div className="text-red-500 text-sm bg-red-50 p-2 rounded border border-red-200">
+                                {formError}
+                              </div>
                             )}
                           </form>
                         )}

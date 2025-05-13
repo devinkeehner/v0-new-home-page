@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle } from "lucide-react"
 import { getCaucusMembers } from "@/lib/caucus_members_data"
+import { submitContactForm } from "@/app/actions/contact-form-action"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -36,6 +37,7 @@ export default function ContactPage() {
     reference: "",
   })
   const [representatives, setRepresentatives] = useState<string[]>(["To General Mailbox"])
+  const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadRepresentatives = async () => {
@@ -72,40 +74,47 @@ export default function ContactPage() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Generate submission details
-    const now = new Date()
-    const date = now.toLocaleDateString()
-    const time = now.toLocaleTimeString()
-    const reference = `REF-${Math.floor(Math.random() * 1000000)
-      .toString()
-      .padStart(6, "0")}`
+    try {
+      // Submit form data to Gravity Forms via server action
+      const result = await submitContactForm({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        zip: formData.zip,
+        issues: formData.issues,
+        representative: formData.representative,
+        message: formData.message,
+      })
 
-    // Simulate form submission
-    setTimeout(() => {
+      if (result.success) {
+        // Show success state
+        setSubmitted(true)
+        setSubmissionDetails({
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString(),
+          reference:
+            result.reference ||
+            `REF-${Math.floor(Math.random() * 1000000)
+              .toString()
+              .padStart(6, "0")}`,
+        })
+      } else {
+        // Handle error
+        setFormError(result.error || "There was a problem submitting your form. Please try again.")
+      }
+    } catch (error) {
+      console.error("Form submission error:", error)
+      setFormError("There was a problem submitting your form. Please try again.")
+    } finally {
       setIsSubmitting(false)
-      setSubmitted(true)
-      setSubmissionDetails({
-        date,
-        time,
-        reference,
-      })
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        address: "",
-        city: "",
-        zip: "",
-        issues: [],
-        representative: "To General Mailbox",
-        message: "",
-      })
-    }, 1500)
+    }
   }
 
   const resetForm = () => {
@@ -297,6 +306,10 @@ export default function ContactPage() {
             <Button type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
+
+            {formError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600">{formError}</div>
+            )}
           </form>
         )}
       </div>
