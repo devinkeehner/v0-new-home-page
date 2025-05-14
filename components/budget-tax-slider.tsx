@@ -107,12 +107,16 @@ export function BudgetTaxSlider() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    // Stop autoplay when user types in form fields
+    setAutoplay(false)
   }
 
   const handleFocus = () => {
     if (!isExpanded) {
       setIsExpanded(true)
     }
+    // Stop autoplay when user interacts with form fields
+    setAutoplay(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
