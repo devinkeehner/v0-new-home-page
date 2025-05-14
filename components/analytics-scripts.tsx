@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import Script from "next/script"
 
 // Google Analytics tracking ID
-const GA_TRACKING_ID = "G-QBXDQ0WXNK"
+const GA_TRACKING_ID = "G-SR4NBENFC6"
 
 export function AnalyticsScripts() {
   useEffect(() => {
@@ -29,10 +29,7 @@ export function AnalyticsScripts() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '${GA_TRACKING_ID}', {
-            page_path: window.location.pathname,
-            linker: { domains: ['cthousegop.com','www.cthousegop.com'] }
-          });
+          gtag('config', '${GA_TRACKING_ID}');
         `}
       </Script>
     </>
