@@ -8,7 +8,9 @@ export default async function Home() {
   // Fetch WordPress posts with error handling
   let posts = []
   try {
-    posts = await getWordPressPosts()
+    const response = await getWordPressPosts()
+    // Extract posts array from the response object
+    posts = response.posts || []
     console.log(`Successfully fetched ${posts.length} posts`)
   } catch (error) {
     console.error("Error in Home component:", error)

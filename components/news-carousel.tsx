@@ -34,8 +34,11 @@ interface NewsCarouselProps {
 }
 
 export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
+  // Ensure posts is an array
+  const postsArray = Array.isArray(posts) ? posts : []
+
   // Limit to 18 posts
-  const limitedPosts = posts.slice(0, 18)
+  const limitedPosts = postsArray.slice(0, 18)
 
   // Group posts into sets of 3
   const itemsPerPage = 3
@@ -65,7 +68,7 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
     return () => clearInterval(interval)
   }, [autoplay, currentIndex])
 
-  if (posts.length === 0) {
+  if (postsArray.length === 0) {
     return (
       <section className="py-12">
         <div className="container">
@@ -87,7 +90,7 @@ export function NewsCarousel({ posts = [] }: NewsCarouselProps) {
           {/* Replace the existing image container with this: */}
           <div className="relative w-full pt-[52.5%] card-image-hover">
             <Image
-              src={imageUrl || "/placeholder.svg"}
+              src={imageUrl || "/news-collage.png"}
               alt={post.title.rendered}
               fill
               className="object-cover transition-all duration-300"

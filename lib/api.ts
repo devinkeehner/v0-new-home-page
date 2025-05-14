@@ -1,107 +1,83 @@
 // Add this import at the top
 import { getCachedData } from "@/lib/kv"
 
-// Update the existing api.ts file to include content rendering
+// Flickr API credentials
+const API_KEY = process.env.flick_key || "73b5dd919d6a510e2a2326f637b8aa21"
+const USER_ID = process.env.flick_ID || "67565175@N02"
+const TAG = process.env.flick_tag || "HRO"
 
-// Sample fallback data in case the API fails
-export const fallbackPosts = [
-  {
-    id: 1,
-    title: {
-      rendered: "House GOP Leader Votes Against Re-Appointment of Committee Chairman",
-    },
-    excerpt: {
-      rendered:
-        "House Republican Leader on Wednesday released the following statement in response to his vote on the re-appointment of Chairman of the Public Utilities Regulatory Authority...",
-    },
-    content: {
-      rendered:
-        "<p>House Republican Leader on Wednesday released the following statement in response to his vote on the re-appointment of Chairman of the Public Utilities Regulatory Authority...</p><p>This is fallback content for when the API fails to load the actual content.</p>",
-    },
-    date: "2023-04-09T10:30:00",
-    link: "https://www.cthousegop.com/news/1",
-  },
-  {
-    id: 2,
-    title: {
-      rendered: "The Capitol Rundown: Republicans Talk Affordability, More",
-    },
-    excerpt: {
-      rendered:
-        "House Republican Leader this week joined Deputy Leader for an episode of The Capitol Rundown. Together, the Republican lawmakers touched on an array of issues on the legislative agenda—from tax policy and affordability to business competitiveness.",
-    },
-    content: {
-      rendered:
-        "<p>House Republican Leader this week joined Deputy Leader for an episode of The Capitol Rundown. Together, the Republican lawmakers touched on an array of issues on the legislative agenda—from tax policy and affordability to business competitiveness.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
-    },
-    date: "2023-04-05T14:15:00",
-    link: "https://www.cthousegop.com/news/2",
-  },
-  {
-    id: 3,
-    title: {
-      rendered: "State Lawmakers Applaud Grant Award for Family Resource Center Expansion Effort in East Haven",
-    },
-    excerpt: {
-      rendered:
-        "State Rep. Joe Zullo, House Minority Leader, and State Sen. Paul Cicarella on Tuesday applauded the approval of a $250,000 state grant to create planning for the expansion of the East Haven Family Resource Center.",
-    },
-    content: {
-      rendered:
-        "<p>State Rep. Joe Zullo, House Minority Leader, and State Sen. Paul Cicarella on Tuesday applauded the approval of a $250,000 state grant to create planning for the expansion of the East Haven Family Resource Center.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
-    },
-    date: "2023-03-11T09:45:00",
-    link: "https://www.cthousegop.com/news/3",
-  },
-  {
-    id: 4,
-    title: {
-      rendered: "House Republicans Propose Budget Amendments to Provide Tax Relief",
-    },
-    excerpt: {
-      rendered:
-        "Connecticut House Republicans today unveiled a series of budget proposals that would provide meaningful tax relief to residents and businesses across the state.",
-    },
-    content: {
-      rendered:
-        "<p>Connecticut House Republicans today unveiled a series of budget proposals that would provide meaningful tax relief to residents and businesses across the state.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
-    },
-    date: "2023-05-01T11:20:00",
-    link: "https://www.cthousegop.com/news/4",
-  },
-  {
-    id: 5,
-    title: {
-      rendered: "GOP Leaders Call for Action on Public Safety Legislation",
-    },
-    excerpt: {
-      rendered:
-        "House Republican Leaders today called for immediate action on several public safety bills that would address rising crime rates in Connecticut communities.",
-    },
-    content: {
-      rendered:
-        "<p>House Republican Leaders today called for immediate action on several public safety bills that would address rising crime rates in Connecticut communities.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
-    },
-    date: "2023-04-28T16:30:00",
-    link: "https://www.cthousegop.com/news/5",
-  },
-  {
-    id: 6,
-    title: {
-      rendered: "Connecticut House Republicans Announce Education Initiative",
-    },
-    excerpt: {
-      rendered:
-        "House Republican Leaders unveiled a comprehensive education initiative aimed at addressing learning loss and improving educational outcomes for Connecticut students.",
-    },
-    content: {
-      rendered:
-        "<p>House Republican Leaders unveiled a comprehensive education initiative aimed at addressing learning loss and improving educational outcomes for Connecticut students.</p><p>This is fallback content for when the API fails to load the actual content.</p>",
-    },
-    date: "2023-04-22T13:45:00",
-    link: "https://www.cthousegop.com/news/6",
-  },
-]
+export interface FlickrPhoto {
+  id: string
+  title: string
+  server: string
+  secret: string
+  farm: number
+  thumbnail: string
+  medium: string
+  large: string
+  original: string
+  datetaken?: string
+  dateupload?: string
+  ownername?: string
+  views?: string
+  description?: { _content?: string }
+}
+
+export async function fetchFlickrImages(count = 20): Promise<FlickrPhoto[]> {
+  try {
+    console.log(`Fetching ${count} Flickr images with tag: ${TAG}`)
+
+    // Create a cache key based on the count
+    const cacheKey = `flickr-images:${count}:${TAG}`
+
+    return await getCachedData(
+      cacheKey,
+      async () => {
+        const res = await fetch(
+          `https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=${API_KEY}&user_id=${USER_ID}&tags=${TAG}&extras=date_taken,date_upload,owner_name,views,description&per_page=${count}&format=json&nojsoncallback=1`,
+          { next: { revalidate: 3600 } }, // Cache for 1 hour
+        )
+
+        if (!res.ok) {
+          throw new Error(`Flickr API error: ${res.status} ${res.statusText}`)
+        }
+
+        const data = await res.json()
+
+        if (data.stat !== "ok" || !data.photos || !Array.isArray(data.photos.photo)) {
+          console.error("Unexpected Flickr API response:", JSON.stringify(data).substring(0, 500))
+          throw new Error("Invalid response from Flickr API")
+        }
+
+        return data.photos.photo.map((photo: any) => {
+          // Construct image URLs using the Flickr URL pattern
+          const base = `https://live.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}`
+
+          return {
+            id: photo.id,
+            title: photo.title || "Connecticut House Republicans",
+            server: photo.server,
+            secret: photo.secret,
+            farm: photo.farm,
+            thumbnail: `${base}_q.jpg`, // 150x150 square thumbnail
+            medium: `${base}.jpg`, // 500px on longest side
+            large: `${base}_b.jpg`, // 1024px on longest side
+            original: `${base}_o.jpg`, // Original image
+            datetaken: photo.datetaken,
+            dateupload: photo.dateupload,
+            ownername: photo.ownername,
+            views: photo.views,
+            description: photo.description,
+          }
+        })
+      },
+      300, // 5 minutes cache
+    )
+  } catch (error) {
+    console.error("Error fetching Flickr images:", error)
+    return []
+  }
+}
 
 /**
  * Extracts JSON from a mixed HTML/JSON response
@@ -136,56 +112,134 @@ function extractJsonFromMixedResponse(text: string): any {
   }
 }
 
-export async function getWordPressPosts() {
+// Function to fetch posts directly from WordPress API
+async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "") {
+  // Use the WordPress API directly
+  let apiUrl = `https://www.cthousegop.com/wp-json/wp/v2/posts?status=publish&page=${page}&per_page=${perPage}&orderby=date&order=desc&_embed`
+
+  // Add search parameter if provided
+  if (searchQuery) {
+    apiUrl += `&search=${encodeURIComponent(searchQuery)}`
+  }
+
+  console.log(`Fetching WordPress posts from: ${apiUrl}`)
+
+  // Add timeout to prevent hanging requests
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
+
   try {
-    // Use caching for WordPress posts
-    const cacheKey = "wordpress:posts:recent"
-
-    return await getCachedData(
-      cacheKey,
-      async () => {
-        // This function only runs on cache miss
-        console.log("Cache miss for WordPress posts, fetching fresh data")
-
-        // Use a more robust fetch with proper headers and cache control
-        const response = await fetch(
-          "https://www.cthousegop.com/wp-json/wp/v2/posts?status=publish&per_page=20&orderby=date&order=desc&_embed",
-          {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            cache: "no-store", // Don't cache the response to avoid stale data
-            next: { revalidate: 0 }, // Disable revalidation for now
-          },
-        )
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch posts: ${response.status}`)
-        }
-
-        // Get the response text instead of directly parsing as JSON
-        const responseText = await response.text()
-
-        // Try to extract JSON from the potentially mixed response
-        try {
-          const posts = extractJsonFromMixedResponse(responseText)
-          return posts
-        } catch (parseError) {
-          console.error("Error parsing WordPress response:", parseError)
-          console.log("Response preview:", responseText.substring(0, 500))
-          return fallbackPosts
-        }
+    // Use a more robust fetch with proper headers and cache control
+    const response = await fetch(apiUrl, {
+      signal: controller.signal,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "CT House Republicans Website",
       },
-      300, // 5 minutes cache
-    )
-  } catch (error) {
-    console.error("Error fetching WordPress posts:", error)
-    // Return fallback data instead of empty array
-    return fallbackPosts
+      cache: "no-store", // Don't cache the response to avoid stale data
+      next: { revalidate: 0 }, // Disable revalidation for now
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      console.error(`Failed to fetch posts: ${response.status} ${response.statusText}`)
+      throw new Error(`Failed to fetch posts: ${response.status}`)
+    }
+
+    // Get total pages from headers
+    const totalPages = Number.parseInt(response.headers.get("X-WP-TotalPages") || "1", 10)
+    const totalPosts = Number.parseInt(response.headers.get("X-WP-Total") || "0", 10)
+
+    // Get the response text instead of directly parsing as JSON
+    const responseText = await response.text()
+
+    // Try to extract JSON from the potentially mixed response
+    try {
+      const posts = extractJsonFromMixedResponse(responseText)
+
+      // Update post links to use main.cthousegop.com
+      posts.forEach((post) => {
+        if (post.link && post.link.includes("cthousegop.com")) {
+          // Extract the slug from the original link
+          const urlParts = post.link.split("/")
+          const slug = urlParts[urlParts.length - 2] || post.slug || `post-${post.id}`
+          post.link = `https://main.cthousegop.com/${slug}`
+        }
+      })
+
+      return {
+        posts,
+        totalPages,
+        totalPosts,
+      }
+    } catch (parseError) {
+      console.error("Error parsing WordPress response:", parseError)
+      console.log("Response preview:", responseText.substring(0, 500))
+      throw parseError
+    }
+  } catch (fetchError) {
+    clearTimeout(timeoutId)
+    console.error("Fetch error:", fetchError)
+    throw fetchError
   }
 }
 
+// Main function to get WordPress posts with caching
+export async function getWordPressPosts(page = 1, perPage = 20, searchQuery = "", forceRefresh = false) {
+  try {
+    // For backward compatibility with existing code
+    if (page === 1 && perPage === 20 && !searchQuery) {
+      // Use caching for WordPress posts
+      const cacheKey = `wordpress:posts:recent`
+
+      return await getCachedData(
+        cacheKey,
+        async () => {
+          // This function only runs on cache miss
+          console.log(`Cache miss for WordPress posts, fetching fresh data`)
+
+          const result = await fetchWordPressPosts(1, 20)
+          return result
+        },
+        300, // 5 minutes cache
+        forceRefresh,
+      )
+    }
+
+    // For pagination and search
+    // Create a cache key that includes pagination and search parameters
+    const cacheKey = searchQuery
+      ? `wordpress:posts:search:${searchQuery}:page:${page}:per:${perPage}`
+      : `wordpress:posts:page:${page}:per:${perPage}`
+
+    // Use caching with fallback to direct API
+    return await getCachedData(
+      cacheKey,
+      () => fetchWordPressPosts(page, perPage, searchQuery),
+      300, // 5 minutes cache
+      forceRefresh,
+    )
+  } catch (error) {
+    console.error("Error in getWordPressPosts:", error)
+
+    // If caching fails, try direct API as a last resort
+    try {
+      return await fetchWordPressPosts(page, perPage, searchQuery)
+    } catch (directError) {
+      console.error("Direct API call also failed:", directError)
+      // Return empty result with pagination info
+      return {
+        posts: [],
+        totalPages: 0,
+        totalPosts: 0,
+      }
+    }
+  }
+}
+
+// Format WordPress date to a more readable format
 export function formatWordPressDate(dateString: string): string {
   const date = new Date(dateString)
   return date.toLocaleDateString("en-US", {
@@ -195,27 +249,22 @@ export function formatWordPressDate(dateString: string): string {
   })
 }
 
+// Strip HTML tags from a string
 export function stripHtmlTags(html: string): string {
   return html.replace(/<\/?[^>]+(>|$)/g, "")
 }
 
-// Updated function to get the featured image URL with aspect ratio control
-export function getFeaturedImageUrl(post: any): string {
-  // Check if the post has a featured image
+// Get the featured image URL from a WordPress post
+export function getFeaturedImageUrl(post: any): string | null {
   if (
     post._embedded &&
     post._embedded["wp:featuredmedia"] &&
     post._embedded["wp:featuredmedia"][0] &&
     post._embedded["wp:featuredmedia"][0].source_url
   ) {
-    const imageUrl = post._embedded["wp:featuredmedia"][0].source_url
-
-    // For WordPress images, we can't directly control the aspect ratio
-    // But we can use the image as is and control the aspect ratio in the component
-    return imageUrl
+    return post._embedded["wp:featuredmedia"][0].source_url
   }
-
-  // Return a placeholder with the correct aspect ratio if no featured image is found
-  // Using a 630x1200 aspect ratio (which is 0.525)
-  return "/news-collage.png"
+  return null
 }
+
+export const fallbackPosts = []
