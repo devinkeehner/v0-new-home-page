@@ -85,7 +85,7 @@ export default function FacebookFeedMasonry() {
     )
   }
 
-  const posts = (data?.data as FacebookPost[]) || []
+  const posts = ((data?.data as FacebookPost[]) || []).slice(0, 6)
 
   // Format the post date
   const formatPostDate = (dateString: string) => {
