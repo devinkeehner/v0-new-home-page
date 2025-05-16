@@ -136,7 +136,16 @@ export default function FacebookFeedMasonry() {
         src: post.permalink_url,
         type: "embed",
         alt: post.message || "Facebook video",
-        embedHtml: `<iframe src="${createFacebookVideoEmbed(post)}" width="560" height="315" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`,
+        embedHtml: `<iframe 
+        src="${createFacebookVideoEmbed(post)}" 
+        width="560" 
+        height="315" 
+        style="border:none;overflow:hidden" 
+        scrolling="no" 
+        frameborder="0" 
+        allowfullscreen="true" 
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; autoplay">
+      </iframe>`,
       })
     } else if (post.full_picture) {
       // For images
