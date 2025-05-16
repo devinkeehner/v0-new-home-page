@@ -1,8 +1,8 @@
 import { BudgetTaxSlider } from "@/components/budget-tax-slider"
 import { NewsCarousel } from "@/components/news-carousel"
-import SocialFeedEmbed from "@/components/social-feed-embed"
 import { PhotoGallery } from "@/components/photo-gallery"
 import { getWordPressPosts } from "@/lib/api"
+import SocialMediaSection from "@/components/social-media-section"
 
 export default async function Home() {
   // Fetch WordPress posts with error handling
@@ -24,7 +24,7 @@ export default async function Home() {
       {/* temporarly removed by user <BudgetSection />*/}
       {/* temporarly removed by user <TaxReliefSection />*/}
       <NewsCarousel posts={posts} />
-      <SocialFeedEmbed />
+      <SocialMediaSection />
       <PhotoGallery />
     </>
   )

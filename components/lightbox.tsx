@@ -45,7 +45,10 @@ export default function Lightbox({ src, alt, type = "image", embedHtml, onClose 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 overscroll-behavior-contain"
+      onClick={onClose}
+    >
       <button
         className="absolute right-4 top-4 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
         onClick={onClose}
