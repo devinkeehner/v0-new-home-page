@@ -37,8 +37,8 @@ export default function Lightbox({ src, alt, type = "image", embedHtml, onClose 
     const videoIdMatch = postUrl.match(/\/videos\/(\d+)/) || postUrl.match(/\/watch\/\?v=(\d+)/)
     if (videoIdMatch && videoIdMatch[1]) {
       const videoId = videoIdMatch[1]
-      // Construct proper video URL with autoplay
-      return `https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcthousegop%2Fvideos%2F${videoId}&show_text=0&width=560&height=315&autoplay=1`
+      // Construct proper video URL with Facebook's preferred format for autoplay
+      return `https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcthousegop%2Fvideos%2F${videoId}&show_text=false&mute=0&autoplay=true&width=560&height=315`
     }
 
     // If we can't extract the ID, just use the post URL
@@ -74,7 +74,8 @@ export default function Lightbox({ src, alt, type = "image", embedHtml, onClose 
               scrolling="no"
               frameBorder="0"
               allowFullScreen={true}
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; autoplay"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              autoPlay={true}
             ></iframe>
           )}
         </div>

@@ -105,20 +105,21 @@ export default function FacebookFeedMasonry() {
   const createFacebookVideoEmbed = (post: FacebookPost) => {
     // First check if we have attachment data with a target URL
     if (post.attachments?.data?.[0]?.target?.url) {
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].target.url)}&show_text=0&width=560&height=315&autoplay=1`
+      // Use Facebook's preferred embed format with muted autoplay
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].target.url)}&show_text=false&mute=0&autoplay=true&width=560&height=315`
     }
 
     // If we have attachment URL
     if (post.attachments?.data?.[0]?.url) {
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].url)}&show_text=0&width=560&height=315&autoplay=1`
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].url)}&show_text=false&mute=0&autoplay=true&width=560&height=315`
     }
 
     // Extract video ID from Facebook URL as fallback
     const videoIdMatch = post.permalink_url.match(/\/videos\/(\d+)/) || post.permalink_url.match(/\/watch\/\?v=(\d+)/)
     if (videoIdMatch && videoIdMatch[1]) {
       const videoId = videoIdMatch[1]
-      // Construct proper video URL
-      return `https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcthousegop%2Fvideos%2F${videoId}&show_text=0&width=560&height=315&autoplay=1`
+      // Construct proper video URL with Facebook's preferred format
+      return `https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcthousegop%2Fvideos%2F${videoId}&show_text=false&mute=0&autoplay=true&width=560&height=315`
     }
 
     // If we can't extract the ID, just use the post URL
@@ -131,21 +132,23 @@ export default function FacebookFeedMasonry() {
     clickedElementRef.current = postRefs.current[index]
 
     if (isVideo(post)) {
-      // For videos, use embed
+      // For videos, use embed with autoplay
+      const embedUrl = createFacebookVideoEmbed(post)
       setSelectedPhoto({
         src: post.permalink_url,
         type: "embed",
         alt: post.message || "Facebook video",
         embedHtml: `<iframe 
-        src="${createFacebookVideoEmbed(post)}" 
+        src="${embedUrl}" 
         width="560" 
         height="315" 
         style="border:none;overflow:hidden" 
         scrolling="no" 
         frameborder="0" 
         allowfullscreen="true" 
-        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; autoplay">
-      </iframe>`,
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+        autoplay="true"
+      ></iframe>`,
       })
     } else if (post.full_picture) {
       // For images
@@ -247,14 +250,26 @@ export default function FacebookFeedMasonry() {
 
                 {/* Engagement Stats */}
                 <div className="flex items-center gap-4 border-t border-b py-2 mt-3 text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
+                  <a
+                    href={`${post.permalink_url}&action=like`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <ThumbsUp className="h-4 w-4" />
                     <span>Like</span>
-                  </div>
-                  <div className="flex items-center gap-1">
+                  </a>
+                  <a
+                    href={`${post.permalink_url}&action=comment`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <MessageSquare className="h-4 w-4" />
                     <span>Comment</span>
-                  </div>
+                  </a>
                 </div>
               </CardContent>
 
