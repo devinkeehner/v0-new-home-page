@@ -9,7 +9,7 @@ const fields = [
   "permalink_url",
   "created_time",
   "full_picture",
-  "attachments{media_type,media_url,type,url}",
+  "attachments{media_type,media_url,type,url,target}",
 ].join(",")
 
 export const revalidate = 300 // ISR – rebuild at most every 5 min

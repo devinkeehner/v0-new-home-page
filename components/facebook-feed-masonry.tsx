@@ -25,6 +25,10 @@ interface FacebookPost {
       media_url?: string
       type: string
       url?: string
+      target?: {
+        id: string
+        url: string
+      }
     }>
   }
 }
@@ -98,8 +102,27 @@ export default function FacebookFeedMasonry() {
   }
 
   // Function to create Facebook video embed URL
-  const createFacebookVideoEmbed = (postUrl: string) => {
-    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(postUrl)}&show_text=0&width=560&height=315&autoplay=1`
+  const createFacebookVideoEmbed = (post: FacebookPost) => {
+    // First check if we have attachment data with a target URL
+    if (post.attachments?.data?.[0]?.target?.url) {
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].target.url)}&show_text=0&width=560&height=315&autoplay=1`
+    }
+
+    // If we have attachment URL
+    if (post.attachments?.data?.[0]?.url) {
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].url)}&show_text=0&width=560&height=315&autoplay=1`
+    }
+
+    // Extract video ID from Facebook URL as fallback
+    const videoIdMatch = post.permalink_url.match(/\/videos\/(\d+)/) || post.permalink_url.match(/\/watch\/\?v=(\d+)/)
+    if (videoIdMatch && videoIdMatch[1]) {
+      const videoId = videoIdMatch[1]
+      // Construct proper video URL
+      return `https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcthousegop%2Fvideos%2F${videoId}&show_text=0&width=560&height=315&autoplay=1`
+    }
+
+    // If we can't extract the ID, just use the post URL
+    return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(post.permalink_url)}&width=500&show_text=false`
   }
 
   // Function to open lightbox
@@ -113,16 +136,7 @@ export default function FacebookFeedMasonry() {
         src: post.permalink_url,
         type: "embed",
         alt: post.message || "Facebook video",
-        embedHtml: `<iframe 
-          src="${createFacebookVideoEmbed(post.permalink_url)}" 
-          width="560" 
-          height="315" 
-          style="border:none;overflow:hidden" 
-          scrolling="no" 
-          frameborder="0" 
-          allowfullscreen="true" 
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
-        </iframe>`,
+        embedHtml: `<iframe src="${createFacebookVideoEmbed(post)}" width="560" height="315" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`,
       })
     } else if (post.full_picture) {
       // For images
