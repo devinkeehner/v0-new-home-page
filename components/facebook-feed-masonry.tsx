@@ -37,9 +37,11 @@ interface FacebookPost {
 const isVideo = (post: FacebookPost) => post.attachments?.data?.some((att) => att.media_type === "video")
 
 export default function FacebookFeedMasonry() {
-  const { data, error, isLoading } = useSWR("/api/fb-feed", fetcher, {
-    refreshInterval: 600_000, // Refresh every 10 minutes
-    revalidateOnFocus: false,
+  const { data, error, isLoading, mutate } = useSWR("/api/fb-feed", fetcher, {
+    refreshInterval: 300000, // Refresh every 5 minutes (reduced from 10)
+    revalidateOnFocus: true, // Enable revalidation on focus
+    revalidateIfStale: true,
+    dedupingInterval: 60000, // Only dedupe requests for 1 minute
   })
   const [selectedPhoto, setSelectedPhoto] = useState<{
     src: string
@@ -172,8 +174,28 @@ export default function FacebookFeedMasonry() {
     }, 0)
   }
 
+  const refreshFeed = async () => {
+    try {
+      await mutate() // Force refresh the data
+    } catch (err) {
+      console.error("Error refreshing feed:", err)
+    }
+  }
+
   return (
     <>
+      {!isLoading && (
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={refreshFeed}
+            variant="outline"
+            size="sm"
+            className="text-primary-navy border-primary-navy hover:bg-primary-navy/10"
+          >
+            Refresh Feed
+          </Button>
+        </div>
+      )}
       <Masonry breakpointCols={breakpointColumns} className="flex w-full -ml-4" columnClassName="pl-4 bg-transparent">
         {posts.map((post, index) => {
           return (
