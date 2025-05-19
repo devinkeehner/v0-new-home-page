@@ -43,7 +43,14 @@ const socialLinks = [
 
 // Restructured navigation items based on the new requirements
 const navItems = [
-  { name: "Contact", href: "/contact" },
+  {
+    name: "Contact",
+    href: "#",
+    children: [
+      { name: "Contact Us", href: "/contact" },
+      { name: "Media Inquiries", href: "/communications-contacts" },
+    ],
+  },
   {
     name: "Representatives",
     href: "#",

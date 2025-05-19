@@ -91,7 +91,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-white/80 hover:text-white">
+                <Link href="/communications-contacts" className="text-white/80 hover:text-white">
                   Media Inquiries
                 </Link>
               </li>
