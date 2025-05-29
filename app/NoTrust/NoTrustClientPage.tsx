@@ -450,7 +450,9 @@ export default function NoTrustClientPage() {
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Child Predator Roams Free</h3>
+                  <h3 className="text-xl font-semibold text-primary-navy mb-2">
+                    Man Charged with Crimes Against Children Roams Free
+                  </h3>
                   <p className="text-sm text-gray-500 mb-3">March 2024</p>
                 </div>
               </div>
