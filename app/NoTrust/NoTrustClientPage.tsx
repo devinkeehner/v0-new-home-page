@@ -554,7 +554,7 @@ export default function NoTrustClientPage() {
               </h3>
               <p className="text-red-700">
                 Astoundingly creates a prioritized pathway for convicted illegal immigrants to sue towns for
-                communicating with federal officials, including attorney fees and costs if they prevail.
+                communicating with federal officials, including paying attorney fees and costs if they prevail.
               </p>
             </div>
           </div>
