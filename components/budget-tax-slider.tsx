@@ -58,6 +58,15 @@ const slides = [
     textColor: "text-primary-navy",
     dotIndex: 2,
   },
+  {
+    id: "trust-act",
+    title: "Tell Governor Lamont:\nVeto HB 7259",
+    subtitle:
+      "Join thousands of Connecticut residents urging Governor Lamont to veto the dangerous Trust Act expansion that threatens public safety.",
+    bgColor: "bg-secondary-red",
+    textColor: "text-white",
+    dotIndex: 3,
+  },
 ]
 
 export function BudgetTaxSlider() {
@@ -465,6 +474,20 @@ export function BudgetTaxSlider() {
                         </div>
                       </div>
                     )}
+                    {/* Fourth Slide: Trust Act Petition */}
+                    {index === 3 && (
+                      <div className="space-y-6">
+                        <div className="flex justify-center">
+                          <Button className="bg-white text-secondary-red hover:bg-gray-100 text-lg px-8 py-3" asChild>
+                            <a href="/NoTrust">Sign the Petition</a>
+                          </Button>
+                        </div>
+                        <p className="text-white/90 text-center max-w-md mx-auto">
+                          Help protect Connecticut communities by urging Governor Lamont to veto this dangerous
+                          legislation.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-center">
@@ -508,6 +531,17 @@ export function BudgetTaxSlider() {
                             Learn More <ExternalLink className="ml-2 h-4 w-4" />
                           </a>
                         </Button>
+                      </div>
+                    )}
+                    {/* Fourth Slide: Trust Act Image */}
+                    {index === 3 && (
+                      <div className="relative h-64 w-64 md:h-80 md:w-80">
+                        <Image
+                          src="/social/trust-act-facebook-ad.jpg"
+                          alt="Tell Governor Lamont to Veto HB 7259"
+                          fill
+                          className="object-contain rounded-lg"
+                        />
                       </div>
                     )}
                   </div>

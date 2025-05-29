@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
 
 // Define the slides for the hero
 const heroSlides = [
@@ -29,6 +30,15 @@ const heroSlides = [
     title: "Reality Check Budget",
     subtitle: "A responsible budget plan that spends less while delivering real tax relief for Connecticut residents.",
     image: "/placeholder.svg?key=nfn2q",
+  },
+  {
+    id: 4,
+    title: "Tell Governor Lamont: Veto HB 7259",
+    subtitle:
+      "The dangerous Trust Act expansion threatens public safety. Join thousands of Connecticut residents demanding a veto.",
+    image: "/social/trust-act-facebook-ad.jpg",
+    link: "/NoTrust",
+    buttonText: "Sign the Petition",
   },
 ]
 
@@ -100,6 +110,13 @@ export function Hero() {
                 {heroSlides[currentSlide].title}
               </h1>
               <p className="mb-6 max-w-md text-lg md:text-xl">{heroSlides[currentSlide].subtitle}</p>
+              {heroSlides[currentSlide].link && (
+                <Button asChild className="mb-6 bg-secondary-red hover:bg-secondary-red/90">
+                  <Link href={heroSlides[currentSlide].link}>
+                    {heroSlides[currentSlide].buttonText || "Learn More"}
+                  </Link>
+                </Button>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="w-full max-w-md">
