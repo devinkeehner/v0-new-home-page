@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CheckCircle, AlertTriangle, Users, Shield, Loader2 } from "lucide-react"
+import { CheckCircle, AlertTriangle, Users, Shield, Loader2, Play } from "lucide-react"
 import { submitPetition } from "@/app/actions/petition-action"
+import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 export default function NoTrustClientPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -18,6 +20,40 @@ export default function NoTrustClientPage() {
   const [displayedSignatureCount, setDisplayedSignatureCount] = useState(0)
 
   const animationFrameId = useRef<number | null>(null)
+
+  const [activeTrustVideoIndex, setActiveTrustVideoIndex] = useState(0)
+  const [isTrustVideoPlaying, setIsTrustVideoPlaying] = useState(false)
+
+  const trustActVideos = [
+    {
+      id: "vBU1i-HJfJE",
+      title: "Rep. Candelora on Dems' Trust Act Expansion and GOP Amendment",
+      description:
+        "House GOP Leader Candelora speaks against CT Dems' Trust Act expansion and in favor of a Republican amendment to add more serious crimes to the list of scenarios where local police are permitted to communicate with ICE.",
+    },
+    {
+      id: "Orx5ZPgSud4",
+      title: "Legislation to Allow Illegal Immigrants to Sue CT Municipalities",
+      description:
+        "Discussion on proposed legislation that could allow undocumented immigrants to sue Connecticut municipalities under certain Trust Act related provisions.",
+    },
+    {
+      id: "S2gic6qXY4Y",
+      title: "The Trust Act is a Failed Policy",
+      description:
+        "Rep. Fishbein highlights issues with the Trust Act, labeling it a failed policy and discussing its impact on public safety.",
+    },
+  ]
+
+  const handleTrustThumbnailClick = (index: number) => {
+    if (index === activeTrustVideoIndex && isTrustVideoPlaying) return
+    setActiveTrustVideoIndex(index)
+    setIsTrustVideoPlaying(false) // Reset playing state so user has to click play
+  }
+
+  const handlePlayTrustVideo = () => {
+    setIsTrustVideoPlaying(true)
+  }
 
   useEffect(() => {
     const fetchSignatureCount = async () => {
@@ -313,23 +349,85 @@ export default function NoTrustClientPage() {
             </div>
           </div>
 
-          {/* YouTube Video */}
-          <div className="mb-8">
-            <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/lBsJqk1SWUc?start=18"
-                title="Trust Act Reforms: CT House GOP News Conference"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="w-full h-full"
-              ></iframe>
+          {/* New YouTube Video Section */}
+          <div className="mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+              {/* Main video player (takes 2/3 width on md screens) */}
+              <div className="md:col-span-2 bg-black rounded-lg shadow-lg overflow-hidden">
+                {isTrustVideoPlaying ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${trustActVideos[activeTrustVideoIndex].id}?autoplay=1&rel=0`}
+                    title={trustActVideos[activeTrustVideoIndex].title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full aspect-video"
+                  ></iframe>
+                ) : (
+                  <div className="relative aspect-video cursor-pointer group" onClick={handlePlayTrustVideo}>
+                    <Image
+                      src={`https://img.youtube.com/vi/${trustActVideos[activeTrustVideoIndex].id}/maxresdefault.jpg`}
+                      alt={trustActVideos[activeTrustVideoIndex].title}
+                      fill
+                      className="object-cover"
+                      priority={activeTrustVideoIndex === 0} // Prioritize loading the first image
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity opacity-0 group-hover:opacity-100">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 sm:p-4 transition-transform group-hover:scale-110">
+                        <Play className="h-10 w-10 sm:h-12 sm:w-12 text-white fill-white" />
+                      </div>
+                    </div>
+                    {/* Static play button for when not hovering, if desired */}
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:opacity-0">
+                      <div className="bg-black/30 backdrop-blur-sm rounded-full p-3 sm:p-4">
+                        <Play className="h-10 w-10 sm:h-12 sm:w-12 text-white fill-white" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="p-4 bg-white">
+                  <h4 className="font-bold text-lg text-primary-navy">{trustActVideos[activeTrustVideoIndex].title}</h4>
+                  <p className="text-gray-600 text-sm mt-1 line-clamp-3">
+                    {trustActVideos[activeTrustVideoIndex].description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Video thumbnails (takes 1/3 width on md screens) */}
+              <div className="md:col-span-1">
+                <h4 className="text-lg font-semibold mb-3 text-primary-navy">More Videos</h4>
+                <div className="space-y-3">
+                  {trustActVideos.map((video, index) => (
+                    <div
+                      key={video.id}
+                      className={cn(
+                        "cursor-pointer transition-all duration-200 flex gap-3 p-2 rounded-lg items-center",
+                        index === activeTrustVideoIndex
+                          ? "bg-light-blue/30 border border-primary-navy shadow-md"
+                          : "bg-gray-50 hover:bg-light-blue/20 border border-gray-200",
+                      )}
+                      onClick={() => handleTrustThumbnailClick(index)}
+                    >
+                      <div className="relative aspect-video w-28 sm:w-32 flex-shrink-0 rounded overflow-hidden">
+                        <Image
+                          src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`}
+                          alt={video.title}
+                          fill
+                          className="object-cover"
+                        />
+                        {index !== activeTrustVideoIndex && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                            <Play className="h-6 w-6 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-sm text-primary-navy line-clamp-2">{video.title}</h5>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <p className="text-center text-gray-600 mt-4 text-sm">
-              House Republican Leaders Explain the Trust Act Problems
-            </p>
           </div>
         </div>
       </section>
