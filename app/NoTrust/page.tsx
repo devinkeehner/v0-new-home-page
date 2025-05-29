@@ -244,16 +244,23 @@ export default function NoTrustPage() {
             </div>
           </div>
 
-          {/* Video Placeholder */}
-          <div className="bg-gray-100 rounded-lg p-12 text-center mb-8">
-            <div className="text-gray-400 mb-4">
-              <div className="bg-gray-200 rounded-full p-6 w-24 h-24 mx-auto mb-4 flex items-center justify-center">
-                <svg className="h-12 w-12" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
+          {/* YouTube Video */}
+          <div className="mb-8">
+            <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/lBsJqk1SWUc?start=18"
+                title="Trust Act Reforms: CT House GOP News Conference"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
             </div>
-            <p className="text-gray-600">[Video: House Republican Leaders Explain the Trust Act Problems]</p>
+            <p className="text-center text-gray-600 mt-4 text-sm">
+              House Republican Leaders Explain the Trust Act Problems
+            </p>
           </div>
         </div>
       </section>
@@ -392,43 +399,6 @@ export default function NoTrustPage() {
               <AlertTriangle className="h-16 w-16 mx-auto mb-4" />
             </div>
             <p className="text-gray-600">[Image: HB 7259 Impact Infographic]</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-16 bg-primary-navy text-white">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold mb-6">Governor Lamont: Veto HB 7259</h2>
-          <p className="text-xl mb-8 text-white/90">
-            Join us in calling for a bipartisan effort to reform this policy and restore the balance between compassion
-            and common sense.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-accent-gold mb-2">Safety</div>
-              <p className="text-white/80">Protect Connecticut communities</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-accent-gold mb-2">Balance</div>
-              <p className="text-white/80">Compassion with common sense</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-accent-gold mb-2">Reform</div>
-              <p className="text-white/80">Bipartisan policy solutions</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <Button
-              size="lg"
-              className="bg-secondary-red hover:bg-secondary-red/90 text-white px-8 py-3 text-lg"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            >
-              Sign the Petition Now
-            </Button>
-            <p className="text-white/80">Your voice matters. Help us protect Connecticut communities.</p>
           </div>
         </div>
       </section>
