@@ -72,13 +72,23 @@ export default function NoTrustPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left Column - Content */}
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Tell Governor Lamont to Veto the Trust Act Expansion
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">Tell Governor Lamont to Veto HB 7259</h1>
               <p className="text-xl mb-8 text-white/90">
-                The Trust Act expansion puts Connecticut communities at risk. Join us in urging Governor Lamont to veto
-                this dangerous legislation.
+                Connecticut House Republicans have issued a formal letter to Governor Lamont urging him to veto HB 7259,
+                the dangerous Trust Act expansion. By signing this petition, you're adding your voice to protect
+                Connecticut communities.
               </p>
+
+              {/* View Letter Button */}
+              <div className="mb-8">
+                <Button
+                  onClick={() => window.open("/trust-act-letter.jpg", "_blank")}
+                  variant="outline"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                >
+                  View the Official Letter to Governor Lamont
+                </Button>
+              </div>
 
               {/* Signature Counter */}
               <div className="text-center mb-8">
@@ -381,14 +391,6 @@ export default function NoTrustPage() {
               <p className="text-red-700">
                 Astoundingly creates a prioritized pathway for convicted illegal immigrants to sue towns for
                 communicating with federal officials, including attorney fees and costs if they prevail.
-              </p>
-            </div>
-
-            <div className="bg-red-50 border-l-4 border-red-500 p-6">
-              <h3 className="text-lg font-semibold text-red-800 mb-2">Blocks State Agencies from Cooperation</h3>
-              <p className="text-red-700">
-                Some legislators want to prohibit state agencies like the Department of Children and Families from
-                cooperating with ICE at all—even in cases involving child trafficking.
               </p>
             </div>
           </div>
