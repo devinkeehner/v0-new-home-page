@@ -128,7 +128,7 @@ export default function NoTrustClientPage() {
               <h1 className="text-4xl md:text-5xl font-bold mb-6">Tell Governor Lamont to Veto HB 7259</h1>
               <p className="text-xl mb-8 text-white/90">
                 Connecticut House Republicans have issued a formal letter to Governor Lamont urging him to veto HB 7259,
-                the dangerous Trust Act expansion. By signing this petition, you're adding your voice to protect
+                the dangerous Trust Act expansion. By signing this petition, you are adding your voice to protect
                 Connecticut communities.
               </p>
 
