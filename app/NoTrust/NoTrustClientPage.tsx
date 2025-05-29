@@ -158,18 +158,22 @@ export default function NoTrustClientPage() {
       {/* Hero Section with Petition Form */}
       <section className="bg-primary-navy text-white py-16">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Left Column - Content */}
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">Tell Governor Lamont to Veto HB 7259</h1>
-              <p className="text-xl mb-8 text-white/90">
-                Connecticut House Republicans have issued a formal letter to Governor Lamont urging him to veto HB 7259,
-                the dangerous Trust Act expansion. By signing this petition, you are adding your voice to protect
-                Connecticut communities.
-              </p>
+          {/* Full-width heading and subtext */}
+          <div className="mb-10">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Tell Governor Lamont to Veto HB 7259</h1>
+            <p className="text-xl mb-8 text-white/90 max-w-4xl">
+              Connecticut House Republicans have issued a formal letter to Governor Lamont urging him to veto HB 7259,
+              the dangerous Trust Act expansion. By signing this petition, you are adding your voice to protect
+              Connecticut communities.
+            </p>
+          </div>
 
-              {/* View Letter Button */}
-              <div className="mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+            {/* Left Column - Content */}
+            <div className="flex flex-col justify-between">
+              {/* Button and Counter Row */}
+              <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
+                {/* View Letter Button */}
                 <Button
                   onClick={() =>
                     window.open(
@@ -182,23 +186,30 @@ export default function NoTrustClientPage() {
                 >
                   View the Official Letter to Governor Lamont
                 </Button>
+
+                {/* Signature Counter - Smaller */}
+                <div className="flex flex-col items-center rounded-lg bg-white/10 px-6 py-3 backdrop-blur-sm">
+                  <div className="text-3xl font-bold text-accent-gold">{displayedSignatureCount.toLocaleString()}</div>
+                  <div className="text-sm text-white/90">CT residents signed</div>
+                </div>
               </div>
 
-              {/* Signature Counter */}
-              <div className="text-center mb-8">
-                <div className="inline-flex flex-col items-center rounded-lg bg-white/10 p-8 backdrop-blur-sm">
-                  <div className="mb-2 text-6xl font-bold text-accent-gold">
-                    {/* Display the animated count */}
-                    {displayedSignatureCount.toLocaleString()}
-                  </div>
-                  <div className="text-xl text-white/90">Connecticut residents have signed</div>
-                  <div className="mt-1 text-sm text-white/70">Join them in opposing the Trust Act expansion</div>
+              {/* YouTube Short Video */}
+              <div className="bg-black rounded-lg shadow-xl overflow-hidden max-w-sm">
+                <div className="aspect-[9/16]">
+                  <iframe
+                    src="https://www.youtube.com/embed/veTHr1T76Bc"
+                    title="Trust Act Short Video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  ></iframe>
                 </div>
               </div>
             </div>
 
             {/* Right Column - Petition Form */}
-            <div className="bg-white rounded-lg p-8 shadow-xl">
+            <div className="bg-white rounded-lg p-8 shadow-xl h-full">
               <h2 className="text-2xl font-bold text-primary-navy mb-6">Sign the Petition</h2>
 
               {submitted ? (
@@ -450,9 +461,7 @@ export default function NoTrustClientPage() {
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-primary-navy mb-2">
-                    Man Charged with Crimes Against Children Roams Free
-                  </h3>
+                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Child Predator Roams Free</h3>
                   <p className="text-sm text-gray-500 mb-3">March 2024</p>
                 </div>
               </div>
