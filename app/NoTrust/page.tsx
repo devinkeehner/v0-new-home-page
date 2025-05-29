@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -13,6 +13,27 @@ export default function NoTrustPage() {
   const [submitted, setSubmitted] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [signatureCount, setSignatureCount] = useState(0)
+
+  useEffect(() => {
+    // Fetch the current signature count
+    const fetchSignatureCount = async () => {
+      try {
+        const response = await fetch("/api/admin/petition-analytics")
+        if (response.ok) {
+          const data = await response.json()
+          setSignatureCount(data.totalSignatures || 0)
+        }
+      } catch (error) {
+        console.error("Error fetching signature count:", error)
+      }
+    }
+
+    fetchSignatureCount()
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchSignatureCount, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
@@ -25,6 +46,7 @@ export default function NoTrustPage() {
       if (result.success) {
         setSubmitted(true)
         setSuccessMessage(result.message)
+        setSignatureCount((prev) => prev + 1)
       } else {
         setFormError(result.message)
       }
@@ -58,28 +80,15 @@ export default function NoTrustPage() {
                 this dangerous legislation.
               </p>
 
-              {/* Key Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-accent-gold mb-2">2019</div>
-                  <div className="text-sm text-white/80">Trust Act Revised</div>
+              {/* Signature Counter */}
+              <div className="text-center mb-8">
+                <div className="inline-flex flex-col items-center rounded-lg bg-white/10 p-8 backdrop-blur-sm">
+                  <div className="mb-2 text-6xl font-bold text-accent-gold">
+                    {(signatureCount + 49).toLocaleString()}
+                  </div>
+                  <div className="text-xl text-white/90">Connecticut residents have signed</div>
+                  <div className="mt-1 text-sm text-white/70">Join them in opposing the Trust Act expansion</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-accent-gold mb-2">6</div>
-                  <div className="text-sm text-white/80">Months at Large</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-accent-gold mb-2">HB 7259</div>
-                  <div className="text-sm text-white/80">Dangerous Expansion</div>
-                </div>
-              </div>
-
-              {/* Image Placeholder */}
-              <div className="bg-white/10 rounded-lg p-8 text-center">
-                <div className="text-white/60 mb-2">
-                  <Shield className="h-16 w-16 mx-auto mb-4" />
-                </div>
-                <p className="text-white/80 text-sm">[Image: Public Safety Concerns]</p>
               </div>
             </div>
 
