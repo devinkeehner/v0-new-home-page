@@ -365,7 +365,7 @@ export default function NoTrustClientPage() {
                 ) : (
                   <div className="relative aspect-video cursor-pointer group" onClick={handlePlayTrustVideo}>
                     <Image
-                      src={`https://img.youtube.com/vi/${trustActVideos[activeTrustVideoIndex].id}/maxresdefault.jpg`}
+                      src={`https://img.youtube.com/vi/${trustActVideos[activeTrustVideoIndex].id}/hqdefault.jpg`}
                       alt={trustActVideos[activeTrustVideoIndex].title}
                       fill
                       className="object-cover"
