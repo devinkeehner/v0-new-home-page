@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -13,27 +13,79 @@ export default function NoTrustClientPage() {
   const [submitted, setSubmitted] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  const [signatureCount, setSignatureCount] = useState(0)
+
+  const [actualSignatureCount, setActualSignatureCount] = useState<number | null>(null)
+  const [displayedSignatureCount, setDisplayedSignatureCount] = useState(0)
+
+  const animationFrameId = useRef<number | null>(null)
 
   useEffect(() => {
-    // Fetch the current signature count
     const fetchSignatureCount = async () => {
       try {
         const response = await fetch("/api/admin/petition-analytics")
         if (response.ok) {
           const data = await response.json()
-          setSignatureCount(data.totalSignatures || 0)
+          setActualSignatureCount(data.totalSignatures || 0)
+        } else {
+          setActualSignatureCount(0) // Set to 0 on error to avoid NaN issues
         }
       } catch (error) {
         console.error("Error fetching signature count:", error)
+        setActualSignatureCount(0) // Set to 0 on error
       }
     }
 
     fetchSignatureCount()
-    // Refresh count every 30 seconds
     const interval = setInterval(fetchSignatureCount, 30000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (actualSignatureCount === null) return
+
+    const targetCount = actualSignatureCount + 49
+    const animationDuration = 1500 // milliseconds
+    const startTime = Date.now()
+
+    const animateCount = () => {
+      const elapsedTime = Date.now() - startTime
+      const progress = Math.min(elapsedTime / animationDuration, 1)
+
+      // Start from 0 for the initial animation
+      const currentDisplay = Math.floor(progress * targetCount)
+      setDisplayedSignatureCount(currentDisplay)
+
+      if (progress < 1) {
+        animationFrameId.current = requestAnimationFrame(animateCount)
+      } else {
+        setDisplayedSignatureCount(targetCount) // Ensure it ends exactly on target
+      }
+    }
+
+    // Reset displayed count to 0 before starting animation if it's the initial load or a significant change
+    // For simplicity, we'll always animate from 0 when actualSignatureCount is first set.
+    // More complex logic could animate from current displayed to new target if actualSignatureCount updates later.
+    if (displayedSignatureCount === 0 && targetCount > 0) {
+      // Animate only if target is > 0
+      animationFrameId.current = requestAnimationFrame(animateCount)
+    } else if (targetCount !== displayedSignatureCount) {
+      // If actualSignatureCount updates later, we can choose to re-animate or jump
+      // For now, let's make it jump to the new target if it's not the initial load
+      // Or, to always animate from 0 when actualSignatureCount changes:
+      setDisplayedSignatureCount(0) // Reset to 0
+      if (targetCount > 0) {
+        animationFrameId.current = requestAnimationFrame(animateCount) // And restart animation
+      } else {
+        setDisplayedSignatureCount(targetCount) // If target is 0 or less, just set it
+      }
+    }
+
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current)
+      }
+    }
+  }, [actualSignatureCount]) // Re-run animation when actualSignatureCount changes
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true)
@@ -46,7 +98,8 @@ export default function NoTrustClientPage() {
       if (result.success) {
         setSubmitted(true)
         setSuccessMessage(result.message)
-        setSignatureCount((prev) => prev + 1)
+        // Increment actual count locally to trigger re-animation
+        setActualSignatureCount((prevCount) => (prevCount !== null ? prevCount + 1 : 1))
       } else {
         setFormError(result.message)
       }
@@ -99,7 +152,8 @@ export default function NoTrustClientPage() {
               <div className="text-center mb-8">
                 <div className="inline-flex flex-col items-center rounded-lg bg-white/10 p-8 backdrop-blur-sm">
                   <div className="mb-2 text-6xl font-bold text-accent-gold">
-                    {(signatureCount + 49).toLocaleString()}
+                    {/* Display the animated count */}
+                    {displayedSignatureCount.toLocaleString()}
                   </div>
                   <div className="text-xl text-white/90">Connecticut residents have signed</div>
                   <div className="mt-1 text-sm text-white/70">Join them in opposing the Trust Act expansion</div>
