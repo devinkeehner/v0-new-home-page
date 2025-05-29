@@ -172,7 +172,7 @@ export default function NoTrustClientPage() {
             {/* Left Column - Content */}
             <div className="flex flex-col justify-between">
               {/* Button and Counter Row */}
-              <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
+              <div className="mb-8">
                 {/* View Letter Button */}
                 <Button
                   onClick={() =>
@@ -186,12 +186,6 @@ export default function NoTrustClientPage() {
                 >
                   View the Official Letter to Governor Lamont
                 </Button>
-
-                {/* Signature Counter - Smaller */}
-                <div className="flex flex-col items-center rounded-lg bg-white/10 px-6 py-3 backdrop-blur-sm">
-                  <div className="text-3xl font-bold text-accent-gold">{displayedSignatureCount.toLocaleString()}</div>
-                  <div className="text-sm text-white/90">CT residents signed</div>
-                </div>
               </div>
 
               {/* YouTube Short Video */}
@@ -211,6 +205,14 @@ export default function NoTrustClientPage() {
             {/* Right Column - Petition Form */}
             <div className="bg-white rounded-lg p-8 shadow-xl h-full">
               <h2 className="text-2xl font-bold text-primary-navy mb-6">Sign the Petition</h2>
+
+              {/* Signature Counter */}
+              <div className="text-center mb-6 p-4 bg-gray-50 rounded-lg border">
+                <div className="text-4xl font-bold text-primary-navy mb-1">
+                  {displayedSignatureCount.toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-600">Connecticut residents have signed this petition</div>
+              </div>
 
               {submitted ? (
                 <Alert className="border-green-500 bg-green-50">
