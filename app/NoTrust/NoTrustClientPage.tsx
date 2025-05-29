@@ -463,8 +463,9 @@ export default function NoTrustClientPage() {
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Child Predator Roams Free</h3>
-                  <p className="text-sm text-gray-500 mb-3">March 2024</p>
+                  <h3 className="text-xl font-semibold text-primary-navy mb-2">
+                    Illegal Immigrant Accused of Crimes Against Minor Roams Free
+                  </h3>
                 </div>
               </div>
               <p className="text-gray-700 mb-4">
@@ -486,7 +487,6 @@ export default function NoTrustClientPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-primary-navy mb-2">Repeat Offender Released</h3>
-                  <p className="text-sm text-gray-500 mb-3">April 2024</p>
                 </div>
               </div>
               <p className="text-gray-700 mb-4">
@@ -510,7 +510,6 @@ export default function NoTrustClientPage() {
                   <h3 className="text-xl font-semibold text-primary-navy mb-2">
                     Convicted Child Predator Returns After Deportation
                   </h3>
-                  <p className="text-sm text-gray-500 mb-3">Recent</p>
                 </div>
               </div>
               <p className="text-gray-700 mb-4">
