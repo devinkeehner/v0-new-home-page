@@ -450,7 +450,7 @@ export default function NoTrustClientPage() {
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Wethersfield Case</h3>
+                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Child Predator Roams Free</h3>
                   <p className="text-sm text-gray-500 mb-3">March 2024</p>
                 </div>
               </div>
@@ -472,7 +472,7 @@ export default function NoTrustClientPage() {
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Hartford Case</h3>
+                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Repeat Offender Released</h3>
                   <p className="text-sm text-gray-500 mb-3">April 2024</p>
                 </div>
               </div>
@@ -494,19 +494,22 @@ export default function NoTrustClientPage() {
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-primary-navy mb-2">Sex Trafficking Case</h3>
+                  <h3 className="text-xl font-semibold text-primary-navy mb-2">
+                    Convicted Child Predator Returns After Deportation
+                  </h3>
                   <p className="text-sm text-gray-500 mb-3">Recent</p>
                 </div>
               </div>
               <p className="text-gray-700 mb-4">
-                A shocking sex trafficking case involving Ecuadorian nationals was only resolved because federal
-                authorities were involved from the start. Had local police handled it alone, the Trust Act would have
-                blocked communication with immigration officials.
+                A shocking case involving an Ecuadorian national who was deported after a conviction for sexual assault
+                of a minor, then illegally reentered the U.S. He was later arrested for driving under the influence,
+                demonstrating how the Trust Act's communication barriers can allow dangerous offenders to remain in our
+                communities.
               </p>
               <div className="bg-red-50 p-4 rounded-lg">
                 <p className="text-sm text-red-800 font-medium">
-                  <strong>Critical Question:</strong> How many cases like this go unresolved due to Trust Act
-                  restrictions?
+                  <strong>Critical Question:</strong> How many more deported offenders have returned and remain
+                  undetected due to Trust Act restrictions?
                 </p>
               </div>
             </div>
