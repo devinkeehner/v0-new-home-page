@@ -172,7 +172,7 @@ export default function NoTrustClientPage() {
             {/* Left Column - Content */}
             <div className="flex flex-col justify-between">
               {/* Button and Counter Row */}
-              <div className="mb-8">
+              <div className="mb-4">
                 {/* View Letter Button */}
                 <Button
                   onClick={() =>
@@ -192,7 +192,7 @@ export default function NoTrustClientPage() {
               <div className="bg-black rounded-lg shadow-xl overflow-hidden max-w-sm">
                 <div className="aspect-[9/16]">
                   <iframe
-                    src="https://www.youtube.com/embed/veTHr1T76Bc"
+                    src="https://www.youtube.com/embed/veTHr1T76Bc?autoplay=1&mute=1"
                     title="Trust Act Short Video"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
