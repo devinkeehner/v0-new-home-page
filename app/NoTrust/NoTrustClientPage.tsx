@@ -9,6 +9,7 @@ import { CheckCircle, AlertTriangle, Users, Shield, Loader2, Play } from "lucide
 import { submitPetition } from "@/app/actions/petition-action"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { QuotesSection } from "@/components/quotes-section"
 
 export default function NoTrustClientPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -321,6 +322,8 @@ export default function NoTrustClientPage() {
           </div>
         </div>
       </section>
+
+      <QuotesSection />
 
       {/* The Problem Section */}
       <section className="py-16 bg-white">
