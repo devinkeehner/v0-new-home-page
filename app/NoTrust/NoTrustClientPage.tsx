@@ -207,14 +207,6 @@ export default function NoTrustClientPage() {
             <div className="bg-white rounded-lg p-8 shadow-xl h-full">
               <h2 className="text-2xl font-bold text-primary-navy mb-6">Sign the Petition</h2>
 
-              {/* Signature Counter */}
-              <div className="text-center mb-6 p-4 bg-gray-50 rounded-lg border">
-                <div className="text-4xl font-bold text-primary-navy mb-1">
-                  {displayedSignatureCount.toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-600">Connecticut residents have signed this petition</div>
-              </div>
-
               {submitted ? (
                 <Alert className="border-green-500 bg-green-50">
                   <CheckCircle className="h-5 w-5 text-green-500" />
