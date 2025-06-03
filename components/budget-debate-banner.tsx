@@ -4,7 +4,7 @@ import { PlayCircle, Volume2, VolumeX } from "lucide-react"
 import { useState, useRef } from "react"
 
 export function BudgetDebateBanner() {
-  const [isMuted, setIsMuted] = useState(false)
+  const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLIFrameElement>(null)
 
   const toggleMute = () => {
@@ -62,7 +62,7 @@ export function BudgetDebateBanner() {
             >
               <iframe
                 ref={videoRef}
-                src={`https://www.youtube.com/embed/VT2nDrGm4hk?autoplay=1&mute=${isMuted ? 1 : 0}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3`}
+                src={`https://www.youtube.com/embed/VT2nDrGm4hk?autoplay=1&mute=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&controls=1`}
                 title="Live Budget Debate - Connecticut House Republicans"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

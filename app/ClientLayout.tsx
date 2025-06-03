@@ -14,7 +14,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-      {isHomePage ? <BudgetDebateBanner /> : <Header />}
+      <Header />
+      {isHomePage && <BudgetDebateBanner />}
       <Suspense>
         {" "}
         {/* Ensure Suspense wraps main content if needed for other children */}
