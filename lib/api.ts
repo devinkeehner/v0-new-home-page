@@ -71,7 +71,7 @@ export async function fetchFlickrImages(count = 20): Promise<FlickrPhoto[]> {
           }
         })
       },
-      300, // 5 minutes cache
+      1800, // 30 minutes cache
     )
   } catch (error) {
     console.error("Error fetching Flickr images:", error)
@@ -203,7 +203,7 @@ export async function getWordPressPosts(page = 1, perPage = 20, searchQuery = ""
           const result = await fetchWordPressPosts(1, 20)
           return result
         },
-        300, // 5 minutes cache
+        1800, // 30 minutes cache
         forceRefresh,
       )
     }
@@ -218,7 +218,7 @@ export async function getWordPressPosts(page = 1, perPage = 20, searchQuery = ""
     return await getCachedData(
       cacheKey,
       () => fetchWordPressPosts(page, perPage, searchQuery),
-      300, // 5 minutes cache
+      1800, // 30 minutes cache
       forceRefresh,
     )
   } catch (error) {

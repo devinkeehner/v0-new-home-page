@@ -2,7 +2,7 @@
 const memoryCache: Record<string, { value: any; expiry: number }> = {}
 
 // Cache TTL in seconds
-const DEFAULT_TTL = 300 // 5 minutes
+const DEFAULT_TTL = 1800 // 30 minutes
 
 // Check if we're running on the client side
 const isClient = typeof window !== "undefined"
@@ -115,6 +115,11 @@ export async function getCachedData<T>(
 
       if (cachedData) {
         console.log(`Cache hit for key: ${key}`)
+      } else {
+        console.log(`Cache miss for key: ${key}`)
+      }
+
+      if (cachedData) {
         return cachedData
       }
     }

@@ -42,7 +42,7 @@ async function getPostBySlug(slug: string) {
 
         return null
       },
-      300, // 5 minutes cache
+      1800, // 30 minutes cache
     )
   } catch (error) {
     console.error("Error fetching post:", error)
@@ -79,7 +79,7 @@ async function getRecentPosts(excludeId: number) {
 
         return await response.json()
       },
-      300, // 5 minutes cache
+      1800, // 30 minutes cache
     )
   } catch (error) {
     console.error("Error fetching recent posts:", error)
