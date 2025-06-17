@@ -13,6 +13,18 @@ export async function GET() {
 
     const supabase = createClient(supabaseUrl, supabaseKey)
 
+    // Fetch distinct combinations of first_name, last_name, and email
+    // Then count the number of such distinct combinations
+    const { count: distinctCount, error: distinctError } = await supabase
+      .from("petition_signatures")
+      .select("first_name, last_name, email", { count: "exact", head: false }) // head: false to get data, count: exact to get total rows
+      .distinct()
+
+    if (distinctError) {
+      console.error("Error fetching distinct signatures:", distinctError)
+      return NextResponse.json({ error: "Failed to fetch distinct signatures" }, { status: 500 })
+    }
+
     // Get total signatures count
     const { count: totalSignatures, error: totalError } = await supabase
       .from("petition_signatures")
@@ -137,6 +149,7 @@ export async function GET() {
       totalSignatures: totalSignatures || 0,
       todaySignatures: todaySignatures || 0,
       weekSignatures: weekSignatures || 0,
+      distinctSignatures: distinctCount || 0, // Include distinct count in analytics
       topTowns,
       topZipCodes,
       dailySignatures,
