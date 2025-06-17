@@ -1,4 +1,4 @@
-import { getCacheStats } from "@/lib/upstash-kv"
+import { getCacheStats } from "@/lib/kv"
 import { NextResponse } from "next/server"
 
 export async function GET() {
