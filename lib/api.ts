@@ -71,7 +71,7 @@ export async function fetchFlickrImages(count = 20): Promise<FlickrPhoto[]> {
           }
         })
       },
-      1800, // 30 minutes cache
+      3600, // 30 minutes cache
     )
   } catch (error) {
     console.error("Error fetching Flickr images:", error)
@@ -113,7 +113,9 @@ function extractJsonFromMixedResponse(text: string): any {
 }
 
 // Function to fetch posts directly from WordPress API
-async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "") {
+async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "", retryCount = 0) {
+  const MAX_RETRIES = 2
+
   // Use the WordPress API directly
   let apiUrl = `https://www.cthousegop.com/wp-json/wp/v2/posts?status=publish&page=${page}&per_page=${perPage}&orderby=date&order=desc&_embed`
 
@@ -182,6 +184,14 @@ async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "") {
   } catch (fetchError) {
     clearTimeout(timeoutId)
     console.error("Fetch error:", fetchError)
+
+    // Retry logic
+    if (retryCount < MAX_RETRIES) {
+      console.log(`Retrying fetch (attempt ${retryCount + 1}/${MAX_RETRIES})`)
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1))) // Exponential backoff
+      return fetchWordPressPosts(page, perPage, searchQuery, retryCount + 1)
+    }
+
     throw fetchError
   }
 }
@@ -203,7 +213,7 @@ export async function getWordPressPosts(page = 1, perPage = 20, searchQuery = ""
           const result = await fetchWordPressPosts(1, 20)
           return result
         },
-        1800, // 30 minutes cache
+        3600, // 30 minutes cache
         forceRefresh,
       )
     }
@@ -218,7 +228,7 @@ export async function getWordPressPosts(page = 1, perPage = 20, searchQuery = ""
     return await getCachedData(
       cacheKey,
       () => fetchWordPressPosts(page, perPage, searchQuery),
-      1800, // 30 minutes cache
+      3600, // 30 minutes cache
       forceRefresh,
     )
   } catch (error) {

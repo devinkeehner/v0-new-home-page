@@ -2,7 +2,7 @@
 const memoryCache: Record<string, { value: any; expiry: number }> = {}
 
 // Cache TTL in seconds
-const DEFAULT_TTL = 1800 // 30 minutes
+const DEFAULT_TTL = 3600 // 1 hour instead of 30 minutes
 
 // Check if we're running on the client side
 const isClient = typeof window !== "undefined"
@@ -21,21 +21,24 @@ function getFromMemoryCache<T>(key: string): T | null {
   return item.value as T
 }
 
-// Set to memory cache
+// Increase memory cache size and add size management
+const MAX_MEMORY_CACHE_SIZE = 100 // Maximum number of items in memory cache
+
 function setMemoryCache<T>(key: string, value: T, ttl = DEFAULT_TTL): void {
   const expiry = Date.now() + ttl * 1000
-  memoryCache[key] = { value, expiry }
 
-  // Clean up old entries occasionally
-  if (Math.random() < 0.1) {
-    // 10% chance to clean up
-    const now = Date.now()
-    Object.keys(memoryCache).forEach((k) => {
-      if (memoryCache[k].expiry < now) {
-        delete memoryCache[k]
-      }
-    })
+  // If cache is getting too large, remove oldest entries
+  if (Object.keys(memoryCache).length >= MAX_MEMORY_CACHE_SIZE) {
+    const entries = Object.entries(memoryCache)
+    entries.sort((a, b) => a[1].expiry - b[1].expiry)
+    // Remove oldest 20% of entries
+    const toRemove = Math.floor(entries.length * 0.2)
+    for (let i = 0; i < toRemove; i++) {
+      delete memoryCache[entries[i][0]]
+    }
   }
+
+  memoryCache[key] = { value, expiry }
 }
 
 // Safe import of Vercel KV
@@ -52,11 +55,21 @@ try {
 
 // Check if Vercel KV is available and properly configured
 const isKVAvailable = () => {
-  if (!kv) return false
+  if (!kv) {
+    console.log("KV not initialized")
+    return false
+  }
 
   try {
-    return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN && typeof kv.get === "function")
+    const hasUrl = !!process.env.KV_REST_API_URL
+    const hasToken = !!process.env.KV_REST_API_TOKEN
+    const hasFunction = typeof kv.get === "function"
+
+    console.log(`KV availability check: URL=${hasUrl}, Token=${hasToken}, Function=${hasFunction}`)
+
+    return hasUrl && hasToken && hasFunction
   } catch (e) {
+    console.log("KV availability check failed:", e)
     return false
   }
 }
