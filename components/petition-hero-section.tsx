@@ -181,9 +181,7 @@ export function PetitionHeroSection({
               </form>
             )}
             <div className="mt-6 text-center text-primary-navy">
-              <p className="text-sm font-semibold">
-                Join <span className="text-3xl font-bold">{displayedSignatureCount}</span> others who have signed!
-              </p>
+             
             </div>
           </div>
         </div>
