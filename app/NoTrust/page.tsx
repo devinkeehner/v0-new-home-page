@@ -2,29 +2,29 @@ import type { Metadata } from "next"
 import NoTrustClientPage from "./NoTrustClientPage"
 
 export const metadata: Metadata = {
-  title: "Tell Governor Lamont to Veto HB 7259 - Connecticut House Republicans",
+  title: "Stand Against HB 7259 - Connecticut House Republicans",
   description:
-    "Join Connecticut House Republicans in urging Governor Lamont to veto HB 7259, the dangerous Trust Act expansion that threatens public safety. Sign the petition today.",
+    "Join Connecticut House Republicans in opposing HB 7259, the dangerous Trust Act expansion. Support our continued efforts to protect Connecticut communities.",
   openGraph: {
-    title: "Tell Governor Lamont to Veto HB 7259",
+    title: "Stand Against HB 7259",
     description:
-      "Join Connecticut House Republicans in urging Governor Lamont to veto HB 7259, the dangerous Trust Act expansion that threatens public safety.",
+      "Join Connecticut House Republicans in opposing HB 7259, the dangerous Trust Act expansion. Support our continued efforts to protect Connecticut communities.",
     images: [
       {
-        url: "/social/trust-act-facebook-ad.jpg",
-        width: 1080,
-        height: 1080,
-        alt: "House Republicans to Governor Lamont - Veto HB 7259",
+        url: "/social/el-leches-facebook-ad.png",
+        width: 1200,
+        height: 630,
+        alt: "ICE arrests alleged gang member hiding from Mexican authorities in sanctuary city - El Leches arrested in New Haven",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tell Governor Lamont to Veto HB 7259",
+    title: "Stand Against HB 7259",
     description:
-      "Join Connecticut House Republicans in urging Governor Lamont to veto HB 7259, the dangerous Trust Act expansion that threatens public safety.",
-    images: ["/social/trust-act-facebook-ad.jpg"],
+      "Join Connecticut House Republicans in opposing HB 7259, the dangerous Trust Act expansion. Support our continued efforts to protect Connecticut communities.",
+    images: ["/social/el-leches-facebook-ad.png"],
   },
 }
 
