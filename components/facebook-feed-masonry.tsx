@@ -1,17 +1,9 @@
 "use client"
 
-import { useState, useRef } from "react"
-import Masonry from "react-masonry-css"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ExternalLink, MessageSquare, ThumbsUp, Share2 } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import SocialFeedEmbed from "@/components/social-feed-embed"
-import Lightbox from "@/components/lightbox"
-import useSWR from "swr"
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ExternalLink, AlertCircle } from "lucide-react"
 
 interface FacebookPost {
   id: string
@@ -21,326 +13,165 @@ interface FacebookPost {
   full_picture?: string
   attachments?: {
     data: Array<{
-      media_type: string
+      media_type?: string
       media_url?: string
-      type: string
+      type?: string
       url?: string
       target?: {
-        id: string
-        url: string
+        url?: string
       }
     }>
   }
 }
 
-// Helper functions as suggested
-const isVideo = (post: FacebookPost) => post.attachments?.data?.some((att) => att.media_type === "video")
+interface FacebookFeedResponse {
+  data?: FacebookPost[]
+  error?: string
+  message?: string
+  tokenExpired?: boolean
+}
 
 export default function FacebookFeedMasonry() {
-  const { data, error, isLoading, mutate } = useSWR("/api/fb-feed", fetcher, {
-    refreshInterval: 300000, // Refresh every 5 minutes (reduced from 10)
-    revalidateOnFocus: true, // Enable revalidation on focus
-    revalidateIfStale: true,
-    dedupingInterval: 60000, // Only dedupe requests for 1 minute
-  })
-  const [selectedPhoto, setSelectedPhoto] = useState<{
-    src: string
-    alt?: string
-    type?: "image" | "video" | "embed"
-    embedHtml?: string
-  } | null>(null)
+  const [posts, setPosts] = useState<FacebookPost[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [tokenExpired, setTokenExpired] = useState(false)
 
-  // Ref to track the clicked element for focus management
-  const clickedElementRef = useRef<HTMLDivElement | null>(null)
-  const postRefs = useRef<Array<HTMLDivElement | null>>([])
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch("/api/fb-feed")
+        const data: FacebookFeedResponse = await response.json()
 
-  // Breakpoints for the masonry layout
-  const breakpointColumns = {
-    default: 3,
-    1280: 3,
-    1024: 2,
-    640: 1,
+        if (data.error) {
+          console.error("Facebook API error:", data.error)
+          setError(data.message || data.error)
+          setTokenExpired(data.tokenExpired || false)
+          setPosts([]) // Set empty posts array
+        } else if (data.data) {
+          setPosts(data.data)
+          setError(null)
+          setTokenExpired(false)
+        } else {
+          setPosts([])
+          setError("No posts available")
+        }
+      } catch (err) {
+        console.error("Error fetching Facebook posts:", err)
+        setError("Failed to load Facebook posts")
+        setPosts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
   }
 
-  if (error) {
-    console.error("Error loading Facebook feed, falling back to embedded feed:", error)
-    // Fall back to the existing social feed component
-    return <SocialFeedEmbed />
+  const truncateMessage = (message: string, maxLength = 200) => {
+    if (message.length <= maxLength) return message
+    return message.substring(0, maxLength) + "..."
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <Masonry breakpointCols={breakpointColumns} className="flex w-full -ml-4" columnClassName="pl-4 bg-transparent">
-        {Array(6)
-          .fill(0)
-          .map((_, i) => (
-            <Card key={i} className="mb-4 overflow-hidden">
-              <Skeleton className="h-48 w-full" />
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-center mb-6">Latest from Facebook</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
               <CardContent className="p-4">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-5/6" />
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-32 bg-gray-200 rounded"></div>
               </CardContent>
-              <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
-                <Skeleton className="h-9 w-28" />
-                <Skeleton className="h-9 w-20" />
-              </CardFooter>
             </Card>
           ))}
-      </Masonry>
+        </div>
+      </div>
     )
   }
 
-  const posts = ((data?.data as FacebookPost[]) || []).slice(0, 6)
-
-  // Format the post date
-  const formatPostDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString)
-      return formatDistanceToNow(date, { addSuffix: true })
-    } catch (e) {
-      return dateString
-    }
-  }
-
-  // Function to create Facebook video embed URL
-  const createFacebookVideoEmbed = (post: FacebookPost) => {
-    // First check if we have attachment data with a target URL
-    if (post.attachments?.data?.[0]?.target?.url) {
-      // Use Facebook's preferred embed format with muted autoplay
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].target.url)}&show_text=false&mute=0&autoplay=true&width=560&height=315`
-    }
-
-    // If we have attachment URL
-    if (post.attachments?.data?.[0]?.url) {
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(post.attachments.data[0].url)}&show_text=false&mute=0&autoplay=true&width=560&height=315`
-    }
-
-    // Extract video ID from Facebook URL as fallback
-    const videoIdMatch = post.permalink_url.match(/\/videos\/(\d+)/) || post.permalink_url.match(/\/watch\/\?v=(\d+)/)
-    if (videoIdMatch && videoIdMatch[1]) {
-      const videoId = videoIdMatch[1]
-      // Construct proper video URL with Facebook's preferred format
-      return `https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcthousegop%2Fvideos%2F${videoId}&show_text=false&mute=0&autoplay=true&width=560&height=315`
-    }
-
-    // If we can't extract the ID, just use the post URL
-    return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(post.permalink_url)}&width=500&show_text=false`
-  }
-
-  // Function to open lightbox
-  const openLightbox = (post: FacebookPost, index: number) => {
-    // Store reference to clicked element for focus management
-    clickedElementRef.current = postRefs.current[index]
-
-    if (isVideo(post)) {
-      // For videos, use embed with autoplay
-      const embedUrl = createFacebookVideoEmbed(post)
-      setSelectedPhoto({
-        src: post.permalink_url,
-        type: "embed",
-        alt: post.message || "Facebook video",
-        embedHtml: `<iframe 
-        src="${embedUrl}" 
-        width="560" 
-        height="315" 
-        style="border:none;overflow:hidden" 
-        scrolling="no" 
-        frameborder="0" 
-        allowfullscreen="true" 
-        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-        autoplay="true"
-      ></iframe>`,
-      })
-    } else if (post.full_picture) {
-      // For images
-      setSelectedPhoto({
-        src: post.full_picture,
-        type: "image",
-        alt: post.message || "Facebook post",
-      })
-    }
-  }
-
-  // Function to close lightbox
-  const closeLightbox = () => {
-    setSelectedPhoto(null)
-
-    // Return focus to the clicked element
-    setTimeout(() => {
-      if (clickedElementRef.current) {
-        clickedElementRef.current.focus()
-      }
-    }, 0)
-  }
-
-  const refreshFeed = async () => {
-    try {
-      await mutate() // Force refresh the data
-    } catch (err) {
-      console.error("Error refreshing feed:", err)
-    }
-  }
-
   return (
-    <>
-      {!isLoading && (
-        <div className="flex justify-end mb-4">
-          <Button
-            onClick={refreshFeed}
-            variant="outline"
-            size="sm"
-            className="text-primary-navy border-primary-navy hover:bg-primary-navy/10"
-          >
-            Refresh Feed
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold text-center mb-6">Latest from Facebook</h2>
+
+      {error && (
+        <Alert className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {tokenExpired
+              ? "Facebook feed temporarily unavailable - token needs refresh. Please check back later."
+              : error}
+          </AlertDescription>
+        </Alert>
       )}
-      <Masonry breakpointCols={breakpointColumns} className="flex w-full -ml-4" columnClassName="pl-4 bg-transparent">
-        {posts.map((post, index) => {
-          return (
-            <Card
-              key={post.id}
-              className="mb-4 overflow-hidden hover:shadow-md transition-shadow"
-              ref={(el) => (postRefs.current[index] = el)}
-            >
-              {/* Post Header */}
-              <div className="flex items-center gap-3 border-b p-3">
-                <div className="relative h-10 w-10 overflow-hidden rounded-full">
-                  <img
-                    src="/images/ct-house-gop-logo.webp"
-                    alt="Connecticut House Republicans"
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <a
-                      href="https://www.facebook.com/cthousegop"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold text-primary-navy hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Connecticut House Republicans
-                    </a>
-                    <svg className="h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                    </svg>
-                  </div>
-                  <span className="text-xs text-gray-500">{formatPostDate(post.created_time)}</span>
-                </div>
-              </div>
 
-              {/* Post Content */}
+      {posts.length === 0 && !loading ? (
+        <div className="text-center py-8">
+          <p className="text-gray-600 mb-4">
+            {error ? "Unable to load Facebook posts at this time." : "No Facebook posts available."}
+          </p>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Follow us on social media:</p>
+            <div className="flex justify-center space-x-4">
+              <a
+                href="https://www.facebook.com/cthousegop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Visit Facebook Page
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {posts.map((post) => (
+            <Card key={post.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-4">
-                {post.message && <p className="mb-3 whitespace-pre-line text-sm line-clamp-5">{post.message}</p>}
-
                 {post.full_picture && (
-                  <div
-                    className="relative overflow-hidden rounded-md cursor-pointer card-image-hover"
-                    onClick={() => openLightbox(post, index)}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`View ${isVideo(post) ? "video" : "image"}: ${post.message || "Facebook post"}`}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault()
-                        openLightbox(post, index)
-                      }
-                    }}
-                  >
+                  <div className="mb-3">
                     <img
                       src={post.full_picture || "/placeholder.svg"}
-                      alt={post.message || "Post image"}
-                      className="w-full object-cover"
+                      alt="Facebook post"
+                      className="w-full h-48 object-cover rounded-lg"
                       loading="lazy"
-                      style={{ width: "100%" }} // Explicit width for Masonry
                     />
-                    {isVideo(post) && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <div className="rounded-full bg-white/30 p-3">
-                          <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
 
-                {/* Engagement Stats */}
-                <div className="flex items-center gap-4 border-t border-b py-2 mt-3 text-xs text-gray-500">
+                {post.message && (
+                  <p className="text-gray-800 mb-3 text-sm leading-relaxed">{truncateMessage(post.message)}</p>
+                )}
+
+                <div className="flex justify-between items-center text-xs text-gray-500">
+                  <span>{formatDate(post.created_time)}</span>
                   <a
-                    href={`${post.permalink_url}&action=like`}
+                    href={post.permalink_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 hover:text-blue-600 transition-colors"
-                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
                   >
-                    <ThumbsUp className="h-4 w-4" />
-                    <span>Like</span>
-                  </a>
-                  <a
-                    href={`${post.permalink_url}&action=comment`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 hover:text-blue-600 transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Comment</span>
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    View Post
                   </a>
                 </div>
               </CardContent>
-
-              {/* Post Footer */}
-              <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-secondary-red text-secondary-red hover:bg-secondary-red/10"
-                  asChild
-                >
-                  <a href={post.permalink_url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    View on Facebook
-                  </a>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-secondary-red text-secondary-red hover:bg-secondary-red/10"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    window.open(
-                      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(post.permalink_url)}`,
-                      "share-facebook",
-                      "width=580,height=296",
-                    )
-                  }}
-                >
-                  <Share2 className="mr-1 h-4 w-4" />
-                  Share
-                </Button>
-              </CardFooter>
             </Card>
-          )
-        })}
-      </Masonry>
-
-      {/* Lightbox for images and videos */}
-      {selectedPhoto && (
-        <Lightbox
-          src={selectedPhoto.src}
-          alt={selectedPhoto.alt}
-          type={selectedPhoto.type}
-          embedHtml={selectedPhoto.embedHtml}
-          onClose={closeLightbox}
-        />
+          ))}
+        </div>
       )}
-    </>
+    </div>
   )
 }
