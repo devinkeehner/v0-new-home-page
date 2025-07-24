@@ -8,79 +8,55 @@ import { Separator } from "@/components/ui/separator"
 import { Suspense } from "react"
 import { fallbackPosts, formatWordPressDate, stripHtmlTags, getFeaturedImageUrl } from "@/lib/api"
 import "./post.css"
-import { getCachedData } from "@/lib/kv"
 
-// Function to fetch a single post by slug with priority
+// Function to fetch a single post by slug - removed caching
 async function getPostBySlug(slug: string) {
   try {
-    const cacheKey = `wordpress:post:${slug}`
+    console.log(`Fetching post directly (no cache): ${slug}`)
 
-    return await getCachedData(
-      cacheKey,
-      async () => {
-        console.log(`Priority fetch for post: ${slug}`)
-
-        const response = await fetch(`https://www.cthousegop.com/wp-json/wp/v2/posts?slug=${slug}&_embed`, {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-          next: { revalidate: 0 },
-          // Add priority hint
-          priority: "high" as any,
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch post: ${response.status}`)
-        }
-
-        const posts = await response.json()
-        return posts && posts.length > 0 ? posts[0] : null
+    const response = await fetch(`https://www.cthousegop.com/wp-json/wp/v2/posts?slug=${slug}&_embed`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
-      3600, // 1 hour cache
-    )
+      cache: "no-store",
+      next: { revalidate: 0 },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch post: ${response.status}`)
+    }
+
+    const posts = await response.json()
+    return posts && posts.length > 0 ? posts[0] : null
   } catch (error) {
     console.error("Error fetching post:", error)
     return null
   }
 }
 
-// Function to fetch recent posts (lower priority)
+// Function to fetch recent posts - removed caching
 async function getRecentPosts(excludeId: number) {
   try {
-    const cacheKey = `wordpress:posts:recent:exclude:${excludeId}`
+    console.log(`Fetching recent posts directly (no cache), excluding ${excludeId}`)
 
-    return await getCachedData(
-      cacheKey,
-      async () => {
-        console.log(`Secondary fetch for recent posts (excluding ${excludeId})`)
-
-        // Add a small delay to deprioritize this request
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
-        const response = await fetch(
-          `https://www.cthousegop.com/wp-json/wp/v2/posts?per_page=2&exclude=${excludeId}&_embed`,
-          {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            cache: "no-store",
-            next: { revalidate: 0 },
-            // Lower priority
-            priority: "low" as any,
-          },
-        )
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch recent posts: ${response.status}`)
-        }
-
-        return await response.json()
+    const response = await fetch(
+      `https://www.cthousegop.com/wp-json/wp/v2/posts?per_page=2&exclude=${excludeId}&_embed`,
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+        next: { revalidate: 0 },
       },
-      3600, // 1 hour cache
     )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch recent posts: ${response.status}`)
+    }
+
+    return await response.json()
   } catch (error) {
     console.error("Error fetching recent posts:", error)
     return fallbackPosts.slice(0, 2)
@@ -160,7 +136,7 @@ async function RecentPostsContent({ excludeId }: { excludeId: number }) {
 }
 
 export default async function PostPage({ params }: { params: { slug: string } }) {
-  // Priority: Get the main post first
+  // Get the main post directly without caching
   const post = await getPostBySlug(params.slug)
 
   if (!post) {
@@ -173,7 +149,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
   return (
     <div className="container py-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* Main Content - 2/3 width on large screens - PRIORITY */}
+        {/* Main Content - 2/3 width on large screens */}
         <div className="lg:col-span-2">
           {/* Featured Image */}
           {featuredImageUrl && (
@@ -225,7 +201,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
           )}
         </div>
 
-        {/* Sidebar - 1/3 width on large screens - SECONDARY */}
+        {/* Sidebar - 1/3 width on large screens */}
         <div className="lg:col-span-1">
           <RecentPostsSidebar excludeId={post.id} />
         </div>
