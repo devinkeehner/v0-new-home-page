@@ -1,4 +1,4 @@
-// Update to remove caching for WordPress posts to improve load times
+// Update to use the new Upstash caching system
 import { getCachedData } from "@/lib/upstash-kv"
 
 // Flickr API credentials
@@ -113,7 +113,7 @@ async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "", ret
   console.log(`Fetching WordPress posts from: ${apiUrl}`)
 
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 10000) // Reduced timeout to 10 seconds
+  const timeoutId = setTimeout(() => controller.abort(), 15000)
 
   try {
     const response = await fetch(apiUrl, {
@@ -123,7 +123,6 @@ async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "", ret
         "Content-Type": "application/json",
         "User-Agent": "CT House Republicans Website",
       },
-      // Remove caching to improve load times
       cache: "no-store",
       next: { revalidate: 0 },
     })
@@ -167,7 +166,7 @@ async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "", ret
 
     if (retryCount < MAX_RETRIES) {
       console.log(`Retrying fetch (attempt ${retryCount + 1}/${MAX_RETRIES})`)
-      await new Promise((resolve) => setTimeout(resolve, 500 * (retryCount + 1))) // Reduced retry delay
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)))
       return fetchWordPressPosts(page, perPage, searchQuery, retryCount + 1)
     }
 
@@ -175,19 +174,45 @@ async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "", ret
   }
 }
 
-// Remove caching from WordPress posts to improve load times
 export async function getWordPressPosts(page = 1, perPage = 20, searchQuery = "", forceRefresh = false) {
   try {
-    console.log(
-      `Fetching WordPress posts directly (no cache) - page: ${page}, perPage: ${perPage}, search: ${searchQuery}`,
+    if (page === 1 && perPage === 20 && !searchQuery) {
+      const cacheKey = `wordpress:posts:recent`
+
+      return await getCachedData(
+        cacheKey,
+        async () => {
+          console.log(`Cache miss for WordPress posts, fetching fresh data`)
+          const result = await fetchWordPressPosts(1, 20)
+          return result
+        },
+        3600, // 1 hour cache
+        forceRefresh,
+      )
+    }
+
+    const cacheKey = searchQuery
+      ? `wordpress:posts:search:${searchQuery}:page:${page}:per:${perPage}`
+      : `wordpress:posts:page:${page}:per:${perPage}`
+
+    return await getCachedData(
+      cacheKey,
+      () => fetchWordPressPosts(page, perPage, searchQuery),
+      3600, // 1 hour cache
+      forceRefresh,
     )
-    return await fetchWordPressPosts(page, perPage, searchQuery)
   } catch (error) {
     console.error("Error in getWordPressPosts:", error)
-    return {
-      posts: [],
-      totalPages: 0,
-      totalPosts: 0,
+
+    try {
+      return await fetchWordPressPosts(page, perPage, searchQuery)
+    } catch (directError) {
+      console.error("Direct API call also failed:", directError)
+      return {
+        posts: [],
+        totalPages: 0,
+        totalPosts: 0,
+      }
     }
   }
 }

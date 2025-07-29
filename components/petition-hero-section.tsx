@@ -29,20 +29,22 @@ export function PetitionHeroSection({
   return (
     <section className="bg-primary-navy text-white py-16">
       <div className="container mx-auto max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Left Column - Content */}
-          <div className="flex flex-col justify-start">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Stand with Connecticut House Republicans Against HB 7259
-            </h1>
-            <p className="text-xl mb-8 text-white/90">
-              Connecticut House Republicans strongly opposed HB 7259, the dangerous Trust Act expansion that threatens
-              public safety. Though Governor Lamont has signed this bill into law, we continue to fight for Connecticut
-              communities. Add your voice to support our ongoing efforts to protect our state.
-            </p>
+        {/* Full-width heading and subtext */}
+        <div className="mb-10">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Tell Governor Lamont to Veto HB 7259</h1>
+          <p className="text-xl mb-8 text-white/90 max-w-4xl">
+            Connecticut House Republicans have issued a formal letter to Governor Lamont urging him to veto HB 7259, the
+            dangerous Trust Act expansion. By signing this petition, you are adding your voice to protect Connecticut
+            communities.
+          </p>
+        </div>
 
-            {/* View Letter Button */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+          {/* Left Column - Content */}
+          <div className="flex flex-col justify-between">
+            {/* Button and Counter Row */}
             <div className="mb-4">
+              {/* View Letter Button */}
               <Button
                 onClick={() =>
                   window.open(
@@ -53,14 +55,27 @@ export function PetitionHeroSection({
                 variant="outline"
                 className="bg-white/10 border-white/30 text-white hover:bg-white/20"
               >
-                View Our Official Opposition Letter
+                View the Official Letter to Governor Lamont
               </Button>
+            </div>
+
+            {/* YouTube Short Video */}
+            <div className="bg-black rounded-lg shadow-xl overflow-hidden max-w-sm">
+              <div className="aspect-[9/16]">
+                <iframe
+                  src="https://www.youtube.com/embed/veTHr1T76Bc?autoplay=1&mute=1"
+                  title="Trust Act Short Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                ></iframe>
+              </div>
             </div>
           </div>
 
           {/* Right Column - Petition Form */}
-          <div className="bg-white rounded-lg p-8 shadow-xl">
-            <h2 className="text-2xl font-bold text-primary-navy mb-6">Make Your Voice Heard</h2>
+          <div className="bg-white rounded-lg p-8 shadow-xl h-full">
+            <h2 className="text-2xl font-bold text-primary-navy mb-6">Sign the Petition</h2>
 
             {submitted ? (
               <Alert className="border-green-500 bg-green-50">
@@ -68,7 +83,7 @@ export function PetitionHeroSection({
                 <AlertTitle className="text-green-700">Thank You!</AlertTitle>
                 <AlertDescription className="text-green-600">
                   {successMessage ||
-                    "Thank you for supporting our efforts! We'll keep you updated on our continued work to protect Connecticut communities and fight against dangerous policies like HB 7259."}
+                    "Your petition signature has been recorded. We'll keep you updated on our efforts to protect Connecticut communities."}
                 </AlertDescription>
                 <Button
                   onClick={resetForm}
@@ -160,11 +175,16 @@ export function PetitionHeroSection({
                 )}
 
                 <p className="text-xs text-gray-600 mt-4">
-                  By signing this form, you agree to receive updates about our ongoing efforts to protect Connecticut
-                  and other Connecticut House Republican initiatives.
+                  By signing this petition, you agree to receive updates about this issue and other Connecticut House
+                  Republican initiatives.
                 </p>
               </form>
             )}
+            <div className="mt-6 text-center text-primary-navy">
+              <p className="text-sm font-semibold">
+                Join <span className="text-3xl font-bold">{displayedSignatureCount}</span> others who have signed!
+              </p>
+            </div>
           </div>
         </div>
       </div>
