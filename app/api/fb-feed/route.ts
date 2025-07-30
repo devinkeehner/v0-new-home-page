@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
-const token = process.env.fb_page_token // Keep it in Vercel env vars
+const token =
+  "EAAUyFP7lYZCwBPB5kp7fcfEtWJlbt4zi9uweLQPGatvBTPoR39C1ZBmEkZA6nZBdLWMMPGBmKlfQgfYkWHZByAWQAQ0dWXhnGzNnNjAuOorb3aS7fx19i9NRYNkE94i4SZAURC1EvSnfJA6bfSQ4uhSer8yyk1b3zBiUiNEYbut4eVskTgKJphQBRmExaRruKdMp5W3zMiyMtcn2j3NgZDZD" // Updated Facebook access token
 const page = "cthousegop" // Facebook page ID or username
 
 const fields = [

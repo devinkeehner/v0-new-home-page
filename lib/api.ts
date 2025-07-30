@@ -124,7 +124,6 @@ async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "", ret
         "User-Agent": "CT House Republicans Website",
       },
       cache: "no-store",
-      next: { revalidate: 0 },
     })
 
     clearTimeout(timeoutId)
@@ -176,43 +175,13 @@ async function fetchWordPressPosts(page = 1, perPage = 20, searchQuery = "", ret
 
 export async function getWordPressPosts(page = 1, perPage = 20, searchQuery = "", forceRefresh = false) {
   try {
-    if (page === 1 && perPage === 20 && !searchQuery) {
-      const cacheKey = `wordpress:posts:recent`
-
-      return await getCachedData(
-        cacheKey,
-        async () => {
-          console.log(`Cache miss for WordPress posts, fetching fresh data`)
-          const result = await fetchWordPressPosts(1, 20)
-          return result
-        },
-        3600, // 1 hour cache
-        forceRefresh,
-      )
-    }
-
-    const cacheKey = searchQuery
-      ? `wordpress:posts:search:${searchQuery}:page:${page}:per:${perPage}`
-      : `wordpress:posts:page:${page}:per:${perPage}`
-
-    return await getCachedData(
-      cacheKey,
-      () => fetchWordPressPosts(page, perPage, searchQuery),
-      3600, // 1 hour cache
-      forceRefresh,
-    )
+    return await fetchWordPressPosts(page, perPage, searchQuery)
   } catch (error) {
     console.error("Error in getWordPressPosts:", error)
-
-    try {
-      return await fetchWordPressPosts(page, perPage, searchQuery)
-    } catch (directError) {
-      console.error("Direct API call also failed:", directError)
-      return {
-        posts: [],
-        totalPages: 0,
-        totalPosts: 0,
-      }
+    return {
+      posts: [],
+      totalPages: 0,
+      totalPosts: 0,
     }
   }
 }
